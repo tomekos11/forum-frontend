@@ -10,7 +10,7 @@
     </div>
 
     <!-- Display posts -->
-    <paginated-posts :posts="topic?.posts" class="mt-5" />
+    <paginated-posts v-if="response?.data" :posts="response.data" class="mt-5" />
 
     <!-- Input area for new post -->
     <div class="fixed bottom-0 left-0 w-full  p-2 border-t shadow-md">
@@ -22,8 +22,14 @@
 
 <script setup lang="ts">
 import { formatDate } from '~/helpers/date';
-import type { Post, Topic } from '~/types/types';
+import type { Meta, Post, Topic } from '~/types/types';
 import type { BreadcrumbItem } from '@nuxt/ui'
+
+interface Response {
+  meta: Meta;
+  topic: Topic;
+  data: Post[];
+}
 
 const config = useRuntimeConfig();
 const route = useRoute();
@@ -59,5 +65,5 @@ const { data: topicName } = useFetch<string>(`${config.public.API_URL}/topics/na
   }
 });
 
-const { data: topic } = useFetch<Topic>(`${config.public.API_URL}/posts/${route.params.topicSlug}`);
+const { data: response } = useFetch<Response>(`${config.public.API_URL}/posts/${route.params.topicSlug}`);
 </script>

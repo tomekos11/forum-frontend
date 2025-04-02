@@ -10,6 +10,19 @@ export interface Topic {
     posts?: Post[];
 }
 
+export interface Meta {
+    total: number;
+    perPage: number;
+    currentPage: number;
+    lastPage: number;
+    firstPage: number;
+    firstPageUrl: string;
+    lastPageUrl: string;
+    nextPageUrl: null | string;
+    previousPageUrl: null | string;
+
+}
+
 export interface Post {
     id: number;
     userId: number;

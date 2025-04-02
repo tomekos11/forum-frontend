@@ -12,10 +12,10 @@
   <div class="text-xl text-gray-500 font-bold text-center">{{ forumName }}</div>
 
   <div class="flex flex-col mt-10">
-    <template v-for="(val, key) in topics" :key="key">
+    <template v-for="(val, key) in reponse?.topics" :key="key">
       
       <NuxtLink 
-        v-for="topic in topics?.[key]" 
+        v-for="topic in reponse?.topics?.[key]" 
         :key="topic.slug" 
         :to="`/forums/${route.params.forumSlug}/topics/${topic.slug}`"
         class="block"
@@ -37,9 +37,9 @@
               </div>
               <div class="w-[160px] truncate">
                 <UAvatar src="https://github.com/benjamincanac.png" size="md" class="mr-1"/>
-                <span class="text-sm">{{ topic }}</span>
+                <span class="text-sm">{{ topic.name }}</span>
                 <div class="text-sm text-center">
-                  <span class="text-gray-400">{{ formatDate(topic) }}</span>
+                  <span class="text-gray-400">{{ formatDate(topic.createdAt) }}</span>
                 </div>
               </div>
             </div>   
@@ -58,12 +58,15 @@
 
 <script setup lang="ts">
 import { formatDate } from '~/helpers/date';
-import type { Topic } from '~/types/types';
+import type { Meta, Topic } from '~/types/types';
 import type { BreadcrumbItem } from '@nuxt/ui'
 
-interface Reponse{ 
-  primaryTopics: Topic[]
-  nonPrimaryTopics: Topic[]
+interface Reponse{
+  meta: Meta;
+  topics: {
+    primaryTopics: Topic[];
+    nonPrimaryTopics: Topic[];
+  }
 }
 
 const config = useRuntimeConfig();
@@ -75,7 +78,7 @@ const { data: forumName } = useFetch<Reponse>(`${config.public.API_URL}/forums/n
   }
 });
 
-const { data: topics } = useFetch<Reponse>(`${config.public.API_URL}/topics/${route.params.forumSlug}`);
+const { data: reponse } = useFetch<Reponse>(`${config.public.API_URL}/topics/${route.params.forumSlug}`);
 
 const page = ref(3)
 
