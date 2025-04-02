@@ -1,14 +1,16 @@
 export interface Topic {
-    id: number,
-    forumId: number,
-    name: string,
-    isPrimary: 0,
-    createdAt: string, 
+    id: number;
+    forumId: number;
+    name: string;
+    slug: string;
+    isPrimary: 0;
+    createdAt: string;
     updatedAt: string;
-    postCounter: null 
+    postCounter: null;
+    posts?: Post[];
 }
 
-export interface LatestPost {
+export interface Post {
     id: number;
     userId: number;
     topicId: number;
@@ -21,9 +23,10 @@ export interface LatestPost {
 export interface Forum {
     id: number;
     name: string;
+    slug: string;
     description: string;
     createdAt: string;
     updatedAt: string;
     topics: Topic[]
-    latestPost: LatestPost;
+    latestPost: Post;
 }

@@ -16,8 +16,8 @@
       
       <NuxtLink 
         v-for="topic in topics?.[key]" 
-        :key="topic.id" 
-        :to="`/forums/${route.params.forumId}/topics/${topic.id}`"
+        :key="topic.slug" 
+        :to="`/forums/${route.params.forumSlug}/topics/${topic.slug}`"
         class="block"
       >
         <UCard class="cursor-pointer hover:bg-green-700 transition">
@@ -71,11 +71,11 @@ const route = useRoute();
 
 const { data: forumName } = useFetch<Reponse>(`${config.public.API_URL}/forums/name`, {
   params: {
-    id: route.params.forumId
+    slug: route.params.forumSlug
   }
 });
 
-const { data: topics } = useFetch<Reponse>(`${config.public.API_URL}/topics/${route.params.forumId}`);
+const { data: topics } = useFetch<Reponse>(`${config.public.API_URL}/topics/${route.params.forumSlug}`);
 
 const page = ref(3)
 
@@ -86,7 +86,7 @@ const items= computed<BreadcrumbItem[]>(() => [
   },
   {
     label: forumName.value || '',
-    to: `/forums/${route.params.forumId}`
+    to: `/forums/${route.params.forumSlug}`
   }
 ])
 </script>

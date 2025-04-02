@@ -13,8 +13,8 @@
       <div class="flex flex-col mt-10">
         <NuxtLink 
           v-for="forum in forums" 
-          :key="forum.id" 
-          :to="`/forums/${forum.id}`"
+          :key="forum.slug" 
+          :to="`/forums/${forum.slug}`"
           class="block"
         >
           <UCard class="cursor-pointer hover:bg-green-700 transition">
