@@ -21,9 +21,9 @@
 </template>
 
 <script setup lang="ts">
+import type { BreadcrumbItem } from '@nuxt/ui';
 import { formatDate } from '~/helpers/date';
 import type { Meta, Post, Topic } from '~/types/types';
-import type { BreadcrumbItem } from '@nuxt/ui'
 
 interface Response {
   meta: Meta;
@@ -34,9 +34,9 @@ interface Response {
 const config = useRuntimeConfig();
 const route = useRoute();
 
-const page = ref(3)
+const page = ref(3);
 
-const content = ref('')
+const content = ref('');
 
 const items= computed<BreadcrumbItem[]>(() => [
   {
@@ -51,7 +51,7 @@ const items= computed<BreadcrumbItem[]>(() => [
     label: topicName.value || '',
     to: `/forums/${route.params.forumSlug}/topics/${route.params.topicSlug}`
   }
-])
+]);
 
 const { data: forumName } = useFetch<string>(`${config.public.API_URL}/forums/name`, {
   params: {

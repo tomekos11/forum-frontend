@@ -11,6 +11,14 @@ export default defineNuxtConfig({
     '@nuxt/ui'
   ],
 
+  plugins: [
+    { src: '~/plugins/pinia.ts', mode: 'client' }
+  ],
+
+  eslint: {
+    // checker: true,
+  },
+
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
@@ -18,4 +26,4 @@ export default defineNuxtConfig({
       API_URL: import.meta.env.NUXT_PUBLIC_API_URL
     }
   }
-})
+});

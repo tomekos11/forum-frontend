@@ -10,7 +10,7 @@
     >
 
       <div class="flex">
-        <img class="rounded-sm mr-5 w-[100px] max-h-[100px]" src="https://github.com/benjamincanac.png" />
+        <img class="rounded-sm mr-5 w-[100px] max-h-[100px]" src="https://github.com/benjamincanac.png" >
         <div>
           <h3 class="font-semibold text-lg text-green-600">{{ post.user.username }}</h3>
           <p class="text-gray-700">{{ post.content }}</p>

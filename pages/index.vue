@@ -50,6 +50,7 @@
 </template>
 
 <script setup lang="ts">
+import type { BreadcrumbItem } from '@nuxt/ui';
 import { formatDate } from '~/helpers/date';
 import type { Forum } from '~/types/types';
 
@@ -62,5 +63,6 @@ const items: BreadcrumbItem[] = [
     label: 'Forum cybersecurity',
     to: '/'
   },
-]
+];
+
 </script>
