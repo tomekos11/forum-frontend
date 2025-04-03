@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   ],
 
   plugins: [
-    { src: '~/plugins/pinia.ts', mode: 'client' }
+    { src: '~/plugins/pinia.ts', mode: 'all' }
   ],
 
   eslint: {

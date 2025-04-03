@@ -14,6 +14,12 @@
       <template #login-leading>
         <UButton label="Zaloguj sie" @click="login" />
       </template>
+
+
+      <template #logout>
+        <UButton label="XDDD" @click="login" />
+      </template>
+      
     </UNavigationMenu >
   </nav>
 </template>
@@ -146,6 +152,9 @@ const items = ref<NavigationMenuItem[][]>([
       label: 'Help',
       icon: 'i-lucide-circle-help',
       slot: 'login'
+    },
+    {
+      slot: 'logout'
     }
   ]
 ]);
@@ -171,17 +180,17 @@ const login = async () => {
   }
 };
 
-onMounted(async () => {
-  const config = useRuntimeConfig();
+// onMounted(async () => {
+//   const config = useRuntimeConfig();
   
-  try {
-    const res = await $fetch(`${config.public.API_URL}/check-user`, {
-      credentials: 'include'
-    });
+//   try {
+//     const res = await $fetch(`${config.public.API_URL}/check-user`, {
+//       credentials: 'include'
+//     });
 
-    console.log(res);
-  } catch (err) {
-    console.error(err);
-  }
-});
+//     console.log(res);
+//   } catch (err) {
+//     console.error(err);
+//   }
+// });
 </script>
