@@ -7,23 +7,40 @@
       :items="items"
       class="data-[orientation=horizontal]:border-b border-(--ui-border) data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48"
     > 
-      <!-- <template #logged-user-leading>
-        <UAvatar src="https://github.com/benjamincanac.png" />
-      </template> -->
-
       <template #user>
         <template v-if="userStore.isLoggedIn">
-          <UAvatar src="https://github.com/benjamincanac.png" />
-
-          {{ userStore.username }}
-          
           <!-- Dropdown menu -->
-          <UPopover placement="bottom-end" @close="isDropdownOpen = false">
-            <UButton label="Pokaż menu" />
+          <UPopover v-model="isDropdownOpen" placement="bottom-end" @close="isDropdownOpen = false">
+            <!-- Główny przycisk -->
+            <!-- <UButton label="Pokaż menu" class="bg-blue-500 text-white hover:bg-blue-600" /> -->
 
+            <div @click="isDropdownOpen = true">
+              <UAvatar src="https://github.com/benjamincanac.png" />
+
+              {{ userStore.username }}
+            </div>
+
+            <!-- Zawartość rozwijanego menu -->
             <template #content>
-              <div @click="logout">
-                Wyloguj się
+              <div class="dropdown-menu">
+                <UButton 
+                  label="Profil" 
+                  color="neutral"
+                  class="hover:bg-gray-200"
+                  @click="() => console.log(1)"
+                />
+                <UButton 
+                  label="Ustawienia" 
+                  color="neutral"
+                  class="hover:bg-gray-200"
+                  @click="() => console.log(2)"
+                />
+                <UButton 
+                  label="Wyloguj się" 
+                  color="neutral"
+                  class="text-red-500 hover:bg-red-100" 
+                  @click="userStore.logout()"
+                />
               </div>
             </template>
           </UPopover>
@@ -31,10 +48,10 @@
         </template>
 
         <template v-else>
-          <UModal title="Zaloguj się">
+          <UModal v-model:open="showLoginModal" title="Zaloguj się">
             <UButton>Zaloguj się</UButton>
             <template #content>
-              <login-modal-content />
+              <login-modal-content @close-modal="showLoginModal = false"/>
             </template>
           </UModal>
         </template>
@@ -46,116 +63,22 @@
 
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui';
+import { useForumsStore } from '~/stores/forum';
 import { useUserStore } from '~/stores/user';
 
 const isDropdownOpen = ref(false);
+const showLoginModal = ref(false);
 
 const userStore = useUserStore();
-const showLoginModal = ref(false);
+const forumsStore = useForumsStore();
 
 const items = computed<NavigationMenuItem[][]>(() => ([
   [
     {
-      label: 'Guide',
+      label: 'Lista forów',
       icon: 'i-lucide-book-open',
-      children: [
-        {
-          label: 'Introduction',
-          description: 'Fully styled and customizable components for Nuxt.',
-          icon: 'i-lucide-house'
-        },
-        {
-          label: 'Installation',
-          description: 'Learn how to install and configure Nuxt UI in your application.',
-          icon: 'i-lucide-cloud-download'
-        },
-        {
-          label: 'Icons',
-          icon: 'i-lucide-smile',
-          description: 'You have nothing to do, @nuxt/icon will handle it automatically.'
-        },
-        {
-          label: 'Colors',
-          icon: 'i-lucide-swatch-book',
-          description: 'Choose a primary and a neutral color from your Tailwind CSS theme.'
-        },
-        {
-          label: 'Theme',
-          icon: 'i-lucide-cog',
-          description:
-            'You can customize components by using the `class` / `ui` props or in your app.config.ts.'
-        }
-      ]
+      children: forumsStore.navigationForums
     },
-    {
-      label: 'Composables',
-      icon: 'i-lucide-database',
-      children: [
-        {
-          label: 'defineShortcuts',
-          icon: 'i-lucide-file-text',
-          description: 'Define shortcuts for your application.',
-          to: '/composables/define-shortcuts'
-        },
-        {
-          label: 'useOverlay',
-          icon: 'i-lucide-file-text',
-          description: 'Display a modal/slideover within your application.',
-          to: '/composables/use-overlay'
-        },
-        {
-          label: 'useToast',
-          icon: 'i-lucide-file-text',
-          description: 'Display a toast within your application.',
-          to: '/composables/use-toast'
-        }
-      ]
-    },
-    {
-      label: 'Components',
-      icon: 'i-lucide-box',
-      to: '/components',
-      active: true,
-      defaultOpen: true,
-      children: [
-        {
-          label: 'Link',
-          icon: 'i-lucide-file-text',
-          description: 'Use NuxtLink with superpowers.',
-          to: '/components/link'
-        },
-        {
-          label: 'Modal',
-          icon: 'i-lucide-file-text',
-          description: 'Display a modal within your application.',
-          to: '/components/modal'
-        },
-        {
-          label: 'NavigationMenu',
-          icon: 'i-lucide-file-text',
-          description: 'Display a list of links.',
-          to: '/components/navigation-menu'
-        },
-        {
-          label: 'Pagination',
-          icon: 'i-lucide-file-text',
-          description: 'Display a list of pages.',
-          to: '/components/pagination'
-        },
-        {
-          label: 'Popover',
-          icon: 'i-lucide-file-text',
-          description: 'Display a non-modal dialog that floats around a trigger element.',
-          to: '/components/popover'
-        },
-        {
-          label: 'Progress',
-          icon: 'i-lucide-file-text',
-          description: 'Show a horizontal bar to indicate task progression.',
-          to: '/components/progress'
-        }
-      ]
-    }
   ],
   
   [
@@ -177,8 +100,30 @@ const items = computed<NavigationMenuItem[][]>(() => ([
     },
   ]
 ]));
-
-const logout = () => {
-  alert(1);
-};
 </script>
+
+<style scoped>
+/* Stylizacja menu */
+.dropdown-menu {
+  display: flex;
+  flex-direction: column;
+  background-color: white !important;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  padding: 8px;
+}
+
+/* Stylizacja elementów menu */
+.dropdown-item {
+  margin-bottom: 8px;
+}
+
+.dropdown-item:last-child {
+  margin-bottom: 0;
+}
+
+.dropdown-item:hover {
+  background-color: #f3f4f6;
+}
+</style>

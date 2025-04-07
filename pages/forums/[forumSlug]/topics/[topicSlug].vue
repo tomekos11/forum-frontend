@@ -10,19 +10,18 @@
     </div>
 
     <!-- Display posts -->
-    <paginated-posts v-if="response?.data" :posts="response.data" class="mt-5" />
+    <paginated-posts v-if="posts" :posts="posts" class="mt-5" />
 
     <!-- Input area for new post -->
     <div class="fixed bottom-0 left-0 w-full  p-2 border-t shadow-md">
       <UTextarea v-model="content" autoresize class="block"/>
-      <UButton label="Dodaj post" class="mx-auto block"/>
+      <UButton label="Dodaj post" class="mx-auto block" @click="addPost"/>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { BreadcrumbItem } from '@nuxt/ui';
-import { formatDate } from '~/helpers/date';
 import type { Meta, Post, Topic } from '~/types/types';
 
 interface Response {
@@ -33,9 +32,10 @@ interface Response {
 
 const config = useRuntimeConfig();
 const route = useRoute();
+const toast = useToast();
 
 const page = ref(3);
-
+const posts = ref<Post[]>([]);
 const content = ref('');
 
 const items= computed<BreadcrumbItem[]>(() => [
@@ -66,4 +66,44 @@ const { data: topicName } = useFetch<string>(`${config.public.API_URL}/topics/na
 });
 
 const { data: response } = useFetch<Response>(`${config.public.API_URL}/posts/${route.params.topicSlug}`);
+
+watch(() => response.value?.data, (nv) => {
+  if(nv) {
+    posts.value = nv;
+  } else {
+    posts.value = [];
+  }
+}, {
+  immediate: true
+});
+
+const addPost = async () => {
+  if(!content.value) return;
+
+  const config = useRuntimeConfig();
+
+  try {
+    const { post, message } = await $fetch(`${config.public.API_URL}/posts`, {
+      body: {
+        topicId: response.value?.topic.id,
+        content: content.value
+      },
+      method: 'post',
+      credentials: 'include'
+    });
+
+    posts.value.push(post);
+
+    toast.add({
+      title: message,
+    });
+  } catch (err) {
+    const errorMessage = err.response?._data?.error || err.message || 'Nieznany błąd';
+
+    toast.add({
+      title: 'Ups wystąpił problem',
+      description: errorMessage
+    });
+  }
+};
 </script>

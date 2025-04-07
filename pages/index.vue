@@ -12,7 +12,7 @@
 
       <div class="flex flex-col mt-10">
         <NuxtLink 
-          v-for="forum in forums" 
+          v-for="forum in useForumsStore().forums" 
           :key="forum.slug" 
           :to="`/forums/${forum.slug}`"
           class="block"
@@ -52,11 +52,7 @@
 <script setup lang="ts">
 import type { BreadcrumbItem } from '@nuxt/ui';
 import { formatDate } from '~/helpers/date';
-import type { Forum } from '~/types/types';
-
-const config = useRuntimeConfig();
-
-const { data: forums } = useFetch<Forum[]>(`${config.public.API_URL}/forums`);
+import { useForumsStore } from '~/stores/forum';
 
 const items: BreadcrumbItem[] = [
   {

@@ -1,3 +1,24 @@
+export interface User {
+    id: number | null;
+    username: string | null;
+    image: string | null;
+    role: 'user' | 'marketing' | 'moderator' | 'admin' | null;
+    createdAt: string | null;
+    updatedAt: string | null;
+  }
+
+export interface Post {
+    id: number;
+    userId: number;
+    topicId: number;
+    title: string;
+    content: string;
+    createdAt: string, 
+    updatedAt: string;
+    user: User;
+    isDeleted: boolean;
+}
+
 export interface Topic {
     id: number;
     forumId: number;
@@ -23,16 +44,6 @@ export interface Meta {
 
 }
 
-export interface Post {
-    id: number;
-    userId: number;
-    topicId: number;
-    title: string;
-    content: string;
-    createdAt: string, 
-    updatedAt: string;
-}
-
 export interface Forum {
     id: number;
     name: string;
@@ -42,4 +53,5 @@ export interface Forum {
     updatedAt: string;
     topics: Topic[]
     latestPost: Post;
+    postCounter?: number;
 }

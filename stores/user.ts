@@ -1,13 +1,5 @@
 import { defineStore } from 'pinia';
-
-interface User {
-    id: number | null;
-    username: string | null;
-    image: string | null;
-    role: 'user' | 'marketing' | 'moderator' | 'admin' | null;
-    createdAt: string | null;
-    updatedAt: string | null;
-  }
+import type { User } from '~/types/types';
 
 export const useUserStore = defineStore('user', () => {
   const id = ref<User['id']>(null);
@@ -32,11 +24,16 @@ export const useUserStore = defineStore('user', () => {
 
   const logout = async () => {
     clear();
+    const toast = useToast();
+    
     try {
       const res = await $fetch<{user: User}>(`${config.public.API_URL}/logout`, {
         credentials: 'include',
       });
       console.log(res);
+      toast.add({
+        title: 'Poprawnie wylogowano'
+      });
     }catch(err) {
       console.error(err);
     }
@@ -65,6 +62,8 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  const canEditAnyonePosts = computed(() => role.value === 'admin' || role.value === 'moderator');
+
   return {
     id,
     username,
@@ -73,6 +72,7 @@ export const useUserStore = defineStore('user', () => {
     createdAt,
     updatedAt,
     isLoggedIn,
+    canEditAnyonePosts,
     fetchUser,
     clear,
     logout,
