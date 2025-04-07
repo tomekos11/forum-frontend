@@ -7,17 +7,37 @@
       :items="items"
       class="data-[orientation=horizontal]:border-b border-(--ui-border) data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48"
     > 
-      <template #components-leading>
+      <!-- <template #logged-user-leading>
         <UAvatar src="https://github.com/benjamincanac.png" />
-      </template>
+      </template> -->
 
-      <template #login-leading>
-        <UButton label="Zaloguj sie" @click="login" />
-      </template>
+      <template #user>
+        <template v-if="userStore.isLoggedIn">
+          <UAvatar src="https://github.com/benjamincanac.png" />
 
+          {{ userStore.username }}
+          
+          <!-- Dropdown menu -->
+          <UPopover placement="bottom-end" @close="isDropdownOpen = false">
+            <UButton label="Pokaż menu" />
 
-      <template #logout>
-        <UButton label="XDDD" @click="login" />
+            <template #content>
+              <div @click="logout">
+                Wyloguj się
+              </div>
+            </template>
+          </UPopover>
+
+        </template>
+
+        <template v-else>
+          <UModal title="Zaloguj się">
+            <UButton>Zaloguj się</UButton>
+            <template #content>
+              <login-modal-content />
+            </template>
+          </UModal>
+        </template>
       </template>
       
     </UNavigationMenu >
@@ -25,7 +45,15 @@
 </template>
 
 <script setup lang="ts">
-const items = ref<NavigationMenuItem[][]>([
+import type { NavigationMenuItem } from '@nuxt/ui';
+import { useUserStore } from '~/stores/user';
+
+const isDropdownOpen = ref(false);
+
+const userStore = useUserStore();
+const showLoginModal = ref(false);
+
+const items = computed<NavigationMenuItem[][]>(() => ([
   [
     {
       label: 'Guide',
@@ -144,53 +172,13 @@ const items = ref<NavigationMenuItem[][]>([
       disabled: true
     },
     {
-      label: 'Help',
-      icon: 'i-lucide-circle-help',
-      slot: 'components'
+      label: 'Zaloguj się',
+      slot: 'user'
     },
-    {
-      label: 'Help',
-      icon: 'i-lucide-circle-help',
-      slot: 'login'
-    },
-    {
-      slot: 'logout'
-    }
   ]
-]);
+]));
 
-const login = async () => {
-  const config = useRuntimeConfig();
-
-  const loginData = {
-    username: 'admin',
-    password: 'admin'
-  };
-
-  try {
-    const res = await $fetch(`${config.public.API_URL}/login`, {
-      body: loginData,
-      method: 'post',
-      credentials: 'include'
-    });
-
-    console.log(res);
-  } catch (err) {
-    console.error(err);
-  }
+const logout = () => {
+  alert(1);
 };
-
-// onMounted(async () => {
-//   const config = useRuntimeConfig();
-  
-//   try {
-//     const res = await $fetch(`${config.public.API_URL}/check-user`, {
-//       credentials: 'include'
-//     });
-
-//     console.log(res);
-//   } catch (err) {
-//     console.error(err);
-//   }
-// });
 </script>

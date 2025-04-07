@@ -17,6 +17,8 @@ export const useUserStore = defineStore('user', () => {
   const createdAt = ref<User['createdAt']>(null);
   const updatedAt = ref<User['updatedAt']>(null);
 
+  const isLoggedIn = computed(() => !!username.value);
+
   const config = useRuntimeConfig();
 
   const clear = () => {
@@ -70,6 +72,7 @@ export const useUserStore = defineStore('user', () => {
     role,
     createdAt,
     updatedAt,
+    isLoggedIn,
     fetchUser,
     clear,
     logout,
