@@ -48,10 +48,10 @@
         </template>
 
         <template v-else>
-          <UModal v-model:open="showLoginModal" title="Zaloguj się">
+          <UModal v-model:open="showModal" title="Zaloguj się">
             <UButton>Zaloguj się</UButton>
             <template #content>
-              <login-modal-content @close-modal="showLoginModal = false"/>
+              <login-modal-content @close-modal="showModal = false"/>
             </template>
           </UModal>
         </template>
@@ -63,11 +63,12 @@
 
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui';
+import { useEventBus } from '@vueuse/core';
 import { useForumsStore } from '~/stores/forum';
 import { useUserStore } from '~/stores/user';
 
 const isDropdownOpen = ref(false);
-const showLoginModal = ref(false);
+const showModal = ref(false);
 
 const userStore = useUserStore();
 const forumsStore = useForumsStore();
@@ -100,6 +101,19 @@ const items = computed<NavigationMenuItem[][]>(() => ([
     },
   ]
 ]));
+
+const showLoginModal = () => {
+  showModal.value = true;
+};
+
+const userBus = useEventBus<string | undefined>('user');
+
+const unsubscribe = userBus.on(showLoginModal);
+
+onBeforeUnmount(() => {
+  unsubscribe();
+});
+
 </script>
 
 <style scoped>

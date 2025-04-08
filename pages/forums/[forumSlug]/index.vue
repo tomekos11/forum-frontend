@@ -81,16 +81,16 @@ const { data: forumName } = useFetch<Reponse>(`${config.public.API_URL}/forums/n
 const { data: response } = await useFetch<Reponse>(
   `${config.public.API_URL}/topics/${route.params.forumSlug}`,
   {
-    key: `forum-${route.params.forumSlug}`,
+    key: `forum-${route.params.forumSlug}-${route.query.page}`,
     server: true,
     params: {
-      page: Number(route.params.page) || 1,
+      page: Number(route.query.page) || 1,
       perPage: 10
     }
   }
 );
 
-const page = ref(route.params.page || response.value?.meta.currentPage || 3);
+const page = ref(response.value?.meta.currentPage || 3);
 const router = useRouter();
 
 if (import.meta.client) {

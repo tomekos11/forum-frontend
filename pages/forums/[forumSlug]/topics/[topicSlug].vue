@@ -14,14 +14,24 @@
 
     <!-- Input area for new post -->
     <div class="fixed bottom-0 left-0 w-full  p-2 border-t shadow-md " style="background: var(--ui-bg)">
-      <UTextarea v-model="content" autoresize class="block"/>
-      <UButton label="Dodaj post" class="mx-auto block" @click="addPost"/>
+      <template v-if="useUserStore().isLoggedIn">
+        
+        <UTextarea v-model="content" autoresize class="block"/>
+        <UButton label="Dodaj post" class="mx-auto block" @click="addPost"/>
+      </template>
+      <template v-else>
+        <span class="text-green-600 cursor-pointer hover:underline" @click="userBus.emit()">Zaloguj się</span>
+        aby odpowiedzieć
+      </template>
     </div>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import type { BreadcrumbItem } from '@nuxt/ui';
+import { useEventBus } from '@vueuse/core';
+import { useUserStore } from '~/stores/user';
 import type { Meta, Post, Topic } from '~/types/types';
 
 interface Response {
@@ -33,6 +43,7 @@ interface Response {
 const config = useRuntimeConfig();
 const route = useRoute();
 const toast = useToast();
+const userBus = useEventBus<string>('user');
 
 const page = ref(3);
 const posts = ref<Post[]>([]);
