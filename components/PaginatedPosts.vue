@@ -1,11 +1,11 @@
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4" style="padding-bottom: 200px;">
     <div
       v-for="(post, index) in posts"
       :key="post.id"
       :class="[
         'p-4 rounded-lg shadow-sm',
-        index % 2 === 0 ? 'bg-gray-100' : 'bg-gray-200'
+        index % 2 === 0 ? 'bg-slate-800' : 'bg-slate-700'
       ]"
     >
 
@@ -16,7 +16,7 @@
 
           <!-- Tryb wyświetlania i edycji -->
           <div v-if="editing?.postId !== post.id">
-            <p class="text-gray-700">{{ post.content }}</p>
+            <p class="text-gray-200">{{ post.content }}</p>
           </div>
 
           <div v-else>
@@ -108,6 +108,10 @@ interface Editing {
 const props = defineProps<Props>();
 
 const posts = ref(props.posts);
+
+watch(() => props.posts, (nv) => {
+  posts.value = nv;
+});
 
 const userStore = useUserStore();
 const toast = useToast();

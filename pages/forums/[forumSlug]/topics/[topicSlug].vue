@@ -13,7 +13,7 @@
     <paginated-posts v-if="posts" :posts="posts" class="mt-5" />
 
     <!-- Input area for new post -->
-    <div class="fixed bottom-0 left-0 w-full  p-2 border-t shadow-md">
+    <div class="fixed bottom-0 left-0 w-full  p-2 border-t shadow-md " style="background: var(--ui-bg)">
       <UTextarea v-model="content" autoresize class="block"/>
       <UButton label="Dodaj post" class="mx-auto block" @click="addPost"/>
     </div>

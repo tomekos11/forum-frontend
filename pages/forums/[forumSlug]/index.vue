@@ -12,10 +12,10 @@
       <div class="text-xl text-gray-500 font-bold text-center">{{ forumName }}</div>
 
       <div class="flex flex-col mt-10">
-        <template v-for="(val, key) in reponse?.topics" :key="key">
+        <template v-for="(val, key) in response?.topics" :key="key">
       
           <NuxtLink 
-            v-for="topic in reponse?.topics?.[key]" 
+            v-for="topic in response?.topics?.[key]" 
             :key="topic.slug" 
             :to="`/forums/${route.params.forumSlug}/topics/${topic.slug}`"
             class="block"
@@ -49,7 +49,7 @@
           </NuxtLink>
         </template>
 
-        <UPagination v-model:page="page" :total="100" class="mt-5 ml-auto mb-2"/>
+        <UPagination v-model:page="page" :items-per-page="10" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2"/>
       </div>
     </div>
   </div>
@@ -78,9 +78,38 @@ const { data: forumName } = useFetch<Reponse>(`${config.public.API_URL}/forums/n
   }
 });
 
-const { data: reponse } = useFetch<Reponse>(`${config.public.API_URL}/topics/${route.params.forumSlug}`);
+const { data: response } = await useFetch<Reponse>(
+  `${config.public.API_URL}/topics/${route.params.forumSlug}`,
+  {
+    key: `forum-${route.params.forumSlug}`,
+    server: true,
+    params: {
+      page: Number(route.params.page) || 1,
+      perPage: 10
+    }
+  }
+);
 
-const page = ref(3);
+const page = ref(route.params.page || response.value?.meta.currentPage || 3);
+const router = useRouter();
+
+if (import.meta.client) {
+  watch(
+    () => response.value?.meta.currentPage,
+    (nv) => {
+      if (nv) {
+        page.value = nv;
+        router.replace({
+          query: {
+            ...route.query,
+            page: String(nv),
+          },
+        });
+      }
+    },
+    { immediate: true }
+  );
+}
 
 const items= computed<BreadcrumbItem[]>(() => [
   {
@@ -92,4 +121,13 @@ const items= computed<BreadcrumbItem[]>(() => [
     to: `/forums/${route.params.forumSlug}`
   }
 ]);
+
+// watch(() => reponse.value?.meta.currentPage, (nv) => {
+//   console.log(nv);
+//   if(nv) {
+//     page.value = nv;
+//   }
+// }, {
+//   immediate: true
+// });
 </script>
