@@ -1,5 +1,5 @@
 <template>
-  <nav class="mx-10">
+  <nav class="mx-2 sm:mx-4 md:mx-6 lg:mx-10">
     <UNavigationMenu
       highlight
       highlight-color="primary"
@@ -96,7 +96,6 @@ const items = computed<NavigationMenuItem[][]>(() => ([
       disabled: true
     },
     {
-      label: 'Zaloguj się',
       slot: 'user'
     },
   ]

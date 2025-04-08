@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-10">
+  <div class="mx-2 sm:mx-4 md:mx-6 lg:mx-10">
 
     <div class="mt-10">
       <UBreadcrumb :items="items">
@@ -49,7 +49,7 @@
           </NuxtLink>
         </template>
 
-        <UPagination v-model:page="page" :items-per-page="10" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2"/>
+        <UPagination v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2"/>
       </div>
     </div>
   </div>
@@ -121,13 +121,4 @@ const items= computed<BreadcrumbItem[]>(() => [
     to: `/forums/${route.params.forumSlug}`
   }
 ]);
-
-// watch(() => reponse.value?.meta.currentPage, (nv) => {
-//   console.log(nv);
-//   if(nv) {
-//     page.value = nv;
-//   }
-// }, {
-//   immediate: true
-// });
 </script>

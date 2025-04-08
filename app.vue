@@ -14,6 +14,14 @@ import { useForumsStore } from './stores/forum';
 const userStore = useUserStore();
 const forumsStore = useForumsStore();
 
-userStore.fetchUser();
 forumsStore.fetchForums();
+
+// if (import.meta.server) {
+//   onServerPrefetch(async () => {
+//     await userStore.fetchUser();
+//   });
+// }
+
+// await useAsyncData('user', () => userStore.fetchUser());
+userStore.fetchUser();
 </script>

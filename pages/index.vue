@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-10">
+  <div class="mx-2 sm:mx-4 md:mx-6 lg:mx-10">
     <div class="mt-10">
 
       <UBreadcrumb :items="items">

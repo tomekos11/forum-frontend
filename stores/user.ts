@@ -39,28 +39,104 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  // const fetchUser = async () => {
+
+  //   try {
+  //     const headers = import.meta.server 
+  //       ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
+  //       : {};
+
+  //     const res = await $fetch<{user: User}>(`${config.public.API_URL}/check-user`, {
+  //       credentials: 'include',
+  //       headers
+  //     });
+
+  //     id.value = res.user.id;
+  //     username.value = res.user.username;
+  //     image.value = res.user.image;
+  //     role.value = res.user.role;
+  //     createdAt.value = res.user.createdAt;
+  //     updatedAt.value = res.user.updatedAt;
+      
+  //     return { ...res.user };
+  //   } catch (err) {
+  //     console.error(err);
+  //     return {
+  //       id: null,
+  //       username: null,
+  //       image: null,
+  //       role: null,
+  //       createdAt: null,
+  //       updatedAt: null,
+  //     };
+  //   }
+  // };
+
   const fetchUser = async () => {
-    try {
-      const headers = import.meta.server 
-        ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
-        : {};
 
-      const res = await $fetch<{user: User}>(`${config.public.API_URL}/check-user`, {
-        credentials: 'include',
-        headers
-      });
+    const { data, error, pending } = await useAsyncData('user', async () => {
+      try {
+        const headers = import.meta.server 
+          ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
+          : {};
 
-      id.value = res.user.id;
-      username.value = res.user.username;
-      image.value = res.user.image;
-      role.value = res.user.role;
-      createdAt.value = res.user.createdAt;
-      updatedAt.value = res.user.updatedAt;
+        const res = await $fetch<{user: User}>(`${config.public.API_URL}/check-user`, {
+          credentials: 'include',
+          headers
+        });
 
-    } catch (err) {
-      console.error(err);
+        return res.user;
+      } catch (err) {
+        console.error(err);
+        return {
+          id: null,
+          username: null,
+          image: null,
+          role: null,
+          createdAt: null,
+          updatedAt: null,
+        };
+      }
+    });
+
+    if (data.value) {
+      id.value = data.value.id;
+      username.value = data.value.username;
+      image.value = data.value.image;
+      role.value = data.value.role;
+      createdAt.value = data.value.createdAt;
+      updatedAt.value = data.value.updatedAt;
     }
+
   };
+
+  // const fetchUser = async () => {
+
+  //   try {
+  //     const headers = import.meta.server 
+  //       ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
+  //       : {};
+
+  //     const res = await $fetch<{user: User}>(`${config.public.API_URL}/check-user`, {
+  //       credentials: 'include',
+  //       headers
+  //     });
+
+  //     id.value = res.user.id;
+  //     username.value = res.user.username;
+  //     image.value = res.user.image;
+  //     role.value = res.user.role;
+  //     createdAt.value = res.user.createdAt;
+  //     updatedAt.value = res.user.updatedAt;
+
+  //     return { authenticated: true, user: res.user };
+  //   } catch (err) {
+  //     console.error(err);
+  //     return { authenticated: false, user: null };
+  //   }
+  // };
+
+
 
   const canEditAnyonePosts = computed(() => role.value === 'admin' || role.value === 'moderator');
 

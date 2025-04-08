@@ -1,12 +1,23 @@
 <template>
-  <div class="space-y-4" style="padding-bottom: 200px;">
+  <div class="space-y-4">
+    <div v-if="!posts || !posts.length" class="p-4 rounded-lg shadow-sm bg-slate-800">
+      <p>
+        Brak postów na tej stronie. Przejdź na początek tematu
+      </p>
+      <UButton
+        label="Kliknij aby przejść na strone 1"
+        :to="{
+          name: $route.name,
+          params: $route.params,
+          query: {...$route.query, page: 1 }
+        }"
+      />
+    </div>
     <div
-      v-for="(post, index) in posts"
+      v-for="(post) in posts"
+      v-else
       :key="post.id"
-      :class="[
-        'p-4 rounded-lg shadow-sm',
-        index % 2 === 0 ? 'bg-slate-800' : 'bg-slate-700'
-      ]"
+      class="p-4 rounded-lg shadow-sm bg-slate-800"
     >
 
       <div class="flex">
