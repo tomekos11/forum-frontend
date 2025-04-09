@@ -69,9 +69,45 @@
         </div>
 
         <template v-if="canEdit">
-          <UButton color="primary" icon="i-heroicons-pencil-square" @click="editProfile">
-            Edytuj profil
-          </UButton>
+          <UModal v-model:open="showEditProfileModal" title="Zmiana danych użytkownika">
+            <UButton color="primary" icon="i-heroicons-pencil-square">
+              Edytuj profil
+            </UButton>
+
+            <template #content>
+              <UCard>
+                <div class="text-lg text-center font-semibold mb-4">
+                  Zmiana danych użytkownika
+                </div>
+
+                <div class="flex flex-col space-y-4">
+                  <UFormField label="Bio">
+                    <UInput
+                      v-model="bio"
+                      placeholder="Wpisz swoje bio"
+                      label="Bio"
+                      class="w-full"
+                    />
+                  </UFormField>
+
+                  <UFormField label="Opis użytkownika">
+                    <UTextarea
+                      v-model="description"
+                      placeholder="Wpisz opis"
+                      label="Opis"
+                      class="w-full"
+                      :rows="4"
+                    />
+                  </UFormField>
+
+                  <UButton color="primary" class="mx-auto" icon="i-heroicons-pencil-square" @click="updateProfile">
+                    Zapisz zmiany
+                  </UButton>
+                </div>
+              </UCard>
+            </template>
+          </UModal>
+          
         </template>
       </div>
 
@@ -92,15 +128,12 @@ import type { User } from '~/types/types';
 const userStore = useUserStore();
 const canEdit = computed(() => userStore.username === route.params.username || ['admin', 'moderator'].includes(userStore.role));
 const searchQuery = ref('');
-
-const editProfile = () => {
-  console.log('1');
-};
+const showEditProfileModal = ref(false);
 
 const config = useRuntimeConfig();
 const route = useRoute();
 
-const { data: user, refresh } = useAsyncData(
+const { data: user } = useAsyncData(
   `user-${route.params.username}`,
   async () => {
     const res = await $fetch<User>(`${config.public.API_URL}/users/${route.params.username}`);
@@ -110,6 +143,8 @@ const { data: user, refresh } = useAsyncData(
   { server: true }
 );
 
+const bio = ref(user.value?.data?.bio || '');
+const description = ref(user.value?.data?.description || '');
 
 const preview = ref(null);
 const fileInput = useTemplateRef('fileInput');
@@ -132,5 +167,34 @@ const handleFileChange = (e) => {
 
 const savePhoto = () => {
   console.log(1);
+};
+
+const toast = useToast();
+
+const updateProfile = async () => {
+
+  const config = useRuntimeConfig();
+
+  const { user: updatedUser } = await $fetch<{message: string; user: User}>(`${config.public.API_URL}/users/profile`, {
+    method: 'patch',
+    body: {
+      username: route.params.username,
+      bio: bio.value,
+      description: description.value
+    },
+    credentials: 'include'
+  });
+
+  if(user.value && user.value.data && updatedUser.data) {
+    user.value.data.description = updatedUser.data.description;
+    user.value.data.bio = updatedUser.data.bio;
+  }
+
+  showEditProfileModal.value = false;
+
+  toast.add({
+    title: 'Profil użytkownika',
+    description: 'Poprawnie zmieniono dane'
+  });
 };
 </script>
