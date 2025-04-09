@@ -114,7 +114,8 @@ if (import.meta.client) {
 const items= computed<BreadcrumbItem[]>(() => [
   {
     label: 'Forum cybersecurity',
-    to: '/'
+    to: '/',
+    icon: 'i-heroicons-home'
   },
   {
     label: forumName.value || '',

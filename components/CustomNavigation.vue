@@ -27,7 +27,7 @@
                   label="Profil" 
                   color="neutral"
                   class="hover:bg-gray-200"
-                  @click="() => console.log(1)"
+                  :to="`/profiles/${userStore.username}`"
                 />
                 <UButton 
                   label="Ustawienia" 

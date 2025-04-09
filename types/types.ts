@@ -1,8 +1,16 @@
+export interface UserData {
+    bio: string | null;
+    description: string | null;
+    image: string | null;
+    createdAt: string | null;
+    updatedAt: string | null;
+}
+
 export interface User {
     id: number | null;
     username: string | null;
-    image: string | null;
     role: 'user' | 'marketing' | 'moderator' | 'admin' | null;
+    data: UserData;
     createdAt: string | null;
     updatedAt: string | null;
   }

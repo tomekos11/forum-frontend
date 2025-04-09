@@ -57,7 +57,8 @@ import { useForumsStore } from '~/stores/forum';
 const items: BreadcrumbItem[] = [
   {
     label: 'Forum cybersecurity',
-    to: '/'
+    to: '/',
+    icon: 'i-heroicons-home'
   },
 ];
 
