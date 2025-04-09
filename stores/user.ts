@@ -4,8 +4,8 @@ import type { User } from '~/types/types';
 export const useUserStore = defineStore('user', () => {
   const id = ref<User['id']>(null);
   const username = ref<User['username']>(null);
-  const image = ref<User['image']>(null);
   const role = ref<User['role']>(null);
+  const data = ref<User['data']>(null);
   const createdAt = ref<User['createdAt']>(null);
   const updatedAt = ref<User['updatedAt']>(null);
 
@@ -16,10 +16,19 @@ export const useUserStore = defineStore('user', () => {
   const clear = () => {
     id.value = null;
     username.value = null;
-    image.value = null;
+    data.value = null;
     role.value = null;
     createdAt.value = null;
     updatedAt.value = null;
+  };
+
+  const setUser = (user: User) => {
+    id.value = user.id;
+    username.value = user.username;
+    data.value = user.data;
+    role.value = user.role;
+    createdAt.value = user.createdAt;
+    updatedAt.value = user.updatedAt;
   };
 
   const logout = async () => {
@@ -74,7 +83,7 @@ export const useUserStore = defineStore('user', () => {
 
   const fetchUser = async () => {
 
-    const { data, error, pending } = await useAsyncData('user', async () => {
+    const { data: fetchedUser, error, pending } = await useAsyncData('user', async () => {
       try {
         const headers = import.meta.server 
           ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
@@ -91,7 +100,7 @@ export const useUserStore = defineStore('user', () => {
         return {
           id: null,
           username: null,
-          image: null,
+          data: null,
           role: null,
           createdAt: null,
           updatedAt: null,
@@ -99,13 +108,9 @@ export const useUserStore = defineStore('user', () => {
       }
     });
 
-    if (data.value) {
-      id.value = data.value.id;
-      username.value = data.value.username;
-      image.value = data.value.image;
-      role.value = data.value.role;
-      createdAt.value = data.value.createdAt;
-      updatedAt.value = data.value.updatedAt;
+
+    if (fetchedUser.value) {
+      setUser(fetchedUser.value);
     }
 
   };
@@ -143,12 +148,13 @@ export const useUserStore = defineStore('user', () => {
   return {
     id,
     username,
-    image,
     role,
+    data,
     createdAt,
     updatedAt,
     isLoggedIn,
     canEditAnyonePosts,
+    setUser,
     fetchUser,
     clear,
     logout,

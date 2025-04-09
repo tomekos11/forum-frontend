@@ -54,8 +54,10 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { useUserStore } from '~/stores/user';
+import type { User } from '~/types/types';
 
 const emit = defineEmits(['close-modal']);
+const userStore = useUserStore();
 
 const isRegister = ref(false); // Kontroluje przełączanie między logowaniem a rejestracją
 const toast = useToast();
@@ -87,14 +89,16 @@ const login = async () => {
   };
 
   try {
-    const res = await $fetch(`${config.public.API_URL}/login`, {
+    const user = await $fetch<User>(`${config.public.API_URL}/login`, {
       body: loginData,
       method: 'post',
       credentials: 'include'
     });
-    console.log(res);
+    
 
-    useUserStore().fetchUser();
+    if(user) {
+      userStore.setUser(user);
+    }
 
     toast.add({
       title: 'Poprawnie zalogowano',

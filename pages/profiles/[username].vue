@@ -9,7 +9,7 @@
         /> -->
         <div class="relative inline-block w-fit">
           <img
-            :src="user.data.image || ''"
+            :src="user.data?.image || ''"
             alt="Avatar"
             class="rounded-full w-32 h-32 object-cover"
           >
@@ -74,6 +74,12 @@
           </UButton>
         </template>
       </div>
+
+      <template v-else>
+        <div class="text-sm">Użytkownik o nazwie {{ $route.params.username }} nie został odnaleziony</div>
+
+        <UInput v-model="searchQuery" icon="i-lucide-search" size="md" variant="outline" class="mt-2" placeholder="Wyszukaj innego użytkownika" @keydown.enter="$router.push(`/profiles/${searchQuery}`)" />
+      </template>
     </UCard>
   </UContainer>
 </template>
@@ -85,6 +91,7 @@ import type { User } from '~/types/types';
 
 const userStore = useUserStore();
 const canEdit = computed(() => userStore.username === route.params.username || ['admin', 'moderator'].includes(userStore.role));
+const searchQuery = ref('');
 
 const editProfile = () => {
   console.log('1');
@@ -93,7 +100,7 @@ const editProfile = () => {
 const config = useRuntimeConfig();
 const route = useRoute();
 
-const { data: user } = useAsyncData(
+const { data: user, refresh } = useAsyncData(
   `user-${route.params.username}`,
   async () => {
     const res = await $fetch<User>(`${config.public.API_URL}/users/${route.params.username}`);

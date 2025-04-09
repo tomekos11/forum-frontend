@@ -10,7 +10,7 @@ export interface User {
     id: number | null;
     username: string | null;
     role: 'user' | 'marketing' | 'moderator' | 'admin' | null;
-    data: UserData;
+    data?: UserData | null;
     createdAt: string | null;
     updatedAt: string | null;
   }
