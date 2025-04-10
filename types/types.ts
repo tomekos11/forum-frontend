@@ -1,3 +1,14 @@
+export type Reaction = 'like' | 'dislike' | null;
+
+export interface ReactionDb {
+    id: number;
+    postId: number;
+    userId: number;
+    reactionType: Reaction;
+    createdAt: string | null;
+    updatedAt: string | null;
+}
+
 export interface UserData {
     bio: string | null;
     description: string | null;
@@ -23,6 +34,11 @@ export interface Post {
     content: string;
     createdAt: string, 
     updatedAt: string;
+    reaction?: {
+        dislike: number;
+        like: number;
+    }
+    myReaction?: Reaction;
     topic?: Topic;
     user: User;
     isDeleted: boolean;

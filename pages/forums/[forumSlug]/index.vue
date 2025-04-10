@@ -93,7 +93,8 @@ const { data: response, refresh } = useAsyncData(
       params: {
         page: Number(route.query.page) || 1,
         perPage: 10,
-      }
+      }, 
+      credentials: 'include'
     });
 
     return res;

@@ -19,7 +19,6 @@
       :key="post.id"
       class="p-4 rounded-lg shadow-sm bg-slate-800"
     >
-
       <div class="flex">
         <img class="rounded-sm mr-5 w-[100px] max-h-[100px]" src="https://github.com/benjamincanac.png">
         <div>
@@ -52,23 +51,27 @@
           <small class="text-gray-500">{{ formatDate(post.createdAt) }}</small>
         </div>
 
-        <div v-if="!post.isDeleted" class="ml-auto flex gap-2 items-start">
+        <div v-if="!post.isDeleted" class="ml-auto flex gap-2 flex-col justify-between items-end">
 
-          <UTooltip text="Odpowiedź na ten post">
-            <UButton icon="i-lucide-reply" size="md" color="info" variant="solid" />
-          </UTooltip>
+          <div class="flex gap-1">
+            <UTooltip text="Odpowiedź na ten post">
+              <UButton icon="i-lucide-reply" size="md" color="info" variant="solid" />
+            </UTooltip>
 
-          <UTooltip v-if="(post.user.id === userStore.id || userStore.isAdminOrModerator)" text="Edytuj post">
-            <UButton icon="i-lucide-pencil" size="md" :color="userStore.isAdminOrModerator ? 'primary': 'info'" variant="solid" @click="startEditing(post)"/>
-          </UTooltip>
+            <UTooltip v-if="(post.user.id === userStore.id || userStore.isAdminOrModerator)" text="Edytuj post">
+              <UButton icon="i-lucide-pencil" size="md" :color="userStore.isAdminOrModerator ? 'primary': 'info'" variant="solid" @click="startEditing(post)"/>
+            </UTooltip>
 
-          <UTooltip v-if="(post.user.id === userStore.id || userStore.isAdminOrModerator)" text="Usuń post" @click="startDeleting(post)">
-            <UButton icon="i-lucide-x" size="md" color="error" variant="solid" />
-          </UTooltip>
+            <UTooltip v-if="(post.user.id === userStore.id || userStore.isAdminOrModerator)" text="Usuń post" @click="startDeleting(post)">
+              <UButton icon="i-lucide-x" size="md" color="error" variant="solid" />
+            </UTooltip>
 
-          <UTooltip v-if="post.user.id !== userStore.id" text="Zgłoś ten post">
-            <UButton icon="i-lucide-message-circle-warning" size="md" color="error" variant="solid" />
-          </UTooltip>
+            <UTooltip v-if="post.user.id !== userStore.id" text="Zgłoś ten post">
+              <UButton icon="i-lucide-message-circle-warning" size="md" color="error" variant="solid" />
+            </UTooltip>
+          </div>
+
+          <reaction-segment v-if="post" :post="post" />
         </div>
 
         <UModal v-model:open="isDeleteModalOpen" title="Potwierdzenie usunięcia">

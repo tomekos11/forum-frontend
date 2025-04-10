@@ -83,11 +83,18 @@ const { data: topicName } = useFetch<string>(`${config.public.API_URL}/topics/na
 const { data: response, refresh } = useAsyncData(
   `topic-${route.params.topicSlug}-${route.query.page || 1}`,
   async () => {
+
+    const headers = import.meta.server 
+      ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
+      : {};
+          
     const res = await $fetch<Response>(`${config.public.API_URL}/posts/${route.params.topicSlug}`, {
       params: {
         page: Number(route.query.page) || 1,
         perPage: 10,
-      }
+      },
+      credentials: 'include',
+      headers
     });
 
     posts.value = res.data;

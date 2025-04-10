@@ -131,7 +131,9 @@ const route = useRoute();
 const { data: user } = useAsyncData(
   `user-${route.params.username}`,
   async () => {
-    const res = await $fetch<User>(`${config.public.API_URL}/users/${route.params.username}`);
+    const res = await $fetch<User>(`${config.public.API_URL}/users/${route.params.username}`, {
+      credentials: 'include'
+    });
 
     return res;
   },
