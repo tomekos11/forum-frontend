@@ -2,11 +2,6 @@
   <UContainer class="py-10">
     <UCard class="max-w-md mx-auto text-center">
       <div v-if="user" class="flex flex-col items-center space-y-4">
-        <!-- <UAvatar
-          src="https://i.pravatar.cc/150?img=3"
-          size="xl"
-          alt="User avatar"
-        /> -->
         <div class="relative inline-block w-fit">
           <img
             :src="user.data?.image || ''"
@@ -15,7 +10,7 @@
           >
 
           <!-- Button w prawym górnym rogu -->
-          <UModal v-if="canEdit">
+          <UModal v-if="canEdit" title="Zmiana avatara użytkownika">
             <UButton
               size="xs"
               variant="soft"
@@ -30,15 +25,15 @@
                   Zmiana zdjęcia
                 </div>
     
-                <div>
-                  Aby zmienić zdjęcie naciśnij poniższy guzik i wybierz plik o rozszerzeniu png, jpg lub jpeg.
+                <div class="text-sm mt-2">
+                  Aby zmienić zdjęcie naciśnij poniższy guzik i wybierz zdjęcie, które się będzie wyświetlało innym użytkownikom.
                 </div>
     
 
                 <img
                   :src="preview || defaultAvatar"
                   alt="Avatar"
-                  class="rounded-full w-32 h-32 object-cover my-2"
+                  class="rounded-full w-32 h-32 object-cover my-2 mx-auto"
                 >
 
                 
@@ -146,7 +141,8 @@ const { data: user } = useAsyncData(
 const bio = ref(user.value?.data?.bio || '');
 const description = ref(user.value?.data?.description || '');
 
-const preview = ref(null);
+const preview = ref(user.value?.data?.image || null);
+
 const fileInput = useTemplateRef('fileInput');
 const defaultAvatar = 'https://placehold.co/150x150?text=Avatar';
 
@@ -165,8 +161,19 @@ const handleFileChange = (e) => {
   }
 };
 
-const savePhoto = () => {
-  console.log(1);
+const savePhoto = async () => {
+
+  const res = await $fetch<{message: string; user: User}>(`${config.public.API_URL}/users/avatar`, {
+    method: 'post',
+    body: {
+      username: route.params.username,
+      avatar: preview.value
+    },
+    credentials: 'include'
+  });
+
+  console.log(res);
+
 };
 
 const toast = useToast();
