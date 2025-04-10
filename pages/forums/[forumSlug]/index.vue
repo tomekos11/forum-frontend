@@ -1,6 +1,5 @@
 <template>
   <div class="mx-2 sm:mx-4 md:mx-6 lg:mx-10">
-
     <div class="mt-10">
       <UBreadcrumb :items="items">
         <template #separator>
@@ -13,7 +12,6 @@
 
       <div class="flex flex-col mt-10">
         <template v-for="(val, key) in response?.topics" :key="key">
-      
           <NuxtLink 
             v-for="topic in response?.topics?.[key]" 
             :key="topic.slug" 
@@ -22,22 +20,26 @@
           >
             <UCard class="cursor-pointer hover:bg-green-700 transition">
               <template #header>
-                <div class="flex items-center justify-between w-full">
+                <div class="flex flex-wrap items-center justify-between w-full gap-4">
                   <!-- Lewa strona -->
-                  <div class="flex items-center">
-                    <UAvatar src="https://github.com/benjamincanac.png" size="xl" class="mr-5"/>
-                    <span>{{ topic.name }}</span>
+                  <div class="flex items-center flex-1 sm:flex-row sm:items-center">
+                    <UAvatar src="https://github.com/benjamincanac.png" size="lg" class="mr-5"/>
+                    <span class="text-sm sm:text-base whitespace-nowrap">{{ topic.name }}</span> <!-- Zapobiega zawijaniu -->
                   </div>
 
                   <!-- Prawa strona (Counter + "odpowiedzi") -->
-                  <div class="flex gap-5">
+                  <div class="flex gap-3 sm:gap-5 items-center justify-end">
                     <div class="text-right">
                       <span class="font-bold text-lg">{{ topic.postCounter || 0 }}</span>
-                      <div class="text-sm text-gray-400">odpowiedzi</div> 
+                      <div class="text-sm text-gray-400">odpowiedzi</div>
                     </div>
                     <div class="w-[160px] truncate">
-                      <UAvatar src="https://github.com/benjamincanac.png" size="md" class="mr-1"/>
-                      <span class="text-sm">{{ topic.name }}</span>
+                      <template v-if="topic?.posts">
+                        <user-img-with-popover :user="topic.posts[0].user || null" />
+
+                        <span class="text-sm">{{ topic.posts[0].user.username }}</span>
+                      </template>
+                     
                       <div class="text-sm text-center">
                         <span class="text-gray-400">{{ formatDate(topic.createdAt) }}</span>
                       </div>
@@ -54,7 +56,6 @@
     </div>
   </div>
 </template>
-
 
 <script setup lang="ts">
 import type { BreadcrumbItem } from '@nuxt/ui';

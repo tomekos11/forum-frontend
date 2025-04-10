@@ -138,8 +138,19 @@ const { data: user } = useAsyncData(
   { server: true }
 );
 
-const bio = ref(user.value?.data?.bio || '');
-const description = ref(user.value?.data?.description || '');
+const bio = ref('');
+const description = ref('');
+
+watch(
+  () => user.value,
+  (newUser) => {
+    if (newUser && newUser.data) {
+      bio.value = newUser.data.bio || '';
+      description.value = newUser.data.description || '';
+    }
+  },
+  { immediate: true }
+);
 
 const preview = ref(user.value?.data?.image || null);
 

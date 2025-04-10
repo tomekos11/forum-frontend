@@ -96,7 +96,6 @@ export const useUserStore = defineStore('user', () => {
 
         return res.user;
       } catch (err) {
-        console.error(err);
         return {
           id: null,
           username: null,
@@ -114,34 +113,6 @@ export const useUserStore = defineStore('user', () => {
     }
 
   };
-
-  // const fetchUser = async () => {
-
-  //   try {
-  //     const headers = import.meta.server 
-  //       ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
-  //       : {};
-
-  //     const res = await $fetch<{user: User}>(`${config.public.API_URL}/check-user`, {
-  //       credentials: 'include',
-  //       headers
-  //     });
-
-  //     id.value = res.user.id;
-  //     username.value = res.user.username;
-  //     image.value = res.user.image;
-  //     role.value = res.user.role;
-  //     createdAt.value = res.user.createdAt;
-  //     updatedAt.value = res.user.updatedAt;
-
-  //     return { authenticated: true, user: res.user };
-  //   } catch (err) {
-  //     console.error(err);
-  //     return { authenticated: false, user: null };
-  //   }
-  // };
-
-
 
   const canEditAnyonePosts = computed(() => role.value === 'admin' || role.value === 'moderator');
 

@@ -23,6 +23,7 @@ export interface Post {
     content: string;
     createdAt: string, 
     updatedAt: string;
+    topic?: Topic;
     user: User;
     isDeleted: boolean;
 }

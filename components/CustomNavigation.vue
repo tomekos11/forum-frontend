@@ -113,6 +113,11 @@ onBeforeUnmount(() => {
   unsubscribe();
 });
 
+watch(() => userStore.isLoggedIn, (nv) => {
+  console.log(nv);
+}, {
+  immediate: true
+});
 </script>
 
 <style scoped>
