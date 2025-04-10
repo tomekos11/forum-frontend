@@ -58,11 +58,11 @@
             <UButton icon="i-lucide-reply" size="md" color="info" variant="solid" />
           </UTooltip>
 
-          <UTooltip v-if="(post.user.id === userStore.id || userStore.canEditAnyonePosts)" text="Edytuj post">
-            <UButton icon="i-lucide-pencil" size="md" :color="userStore.canEditAnyonePosts ? 'primary': 'info'" variant="solid" @click="startEditing(post)"/>
+          <UTooltip v-if="(post.user.id === userStore.id || userStore.isAdminOrModerator)" text="Edytuj post">
+            <UButton icon="i-lucide-pencil" size="md" :color="userStore.isAdminOrModerator ? 'primary': 'info'" variant="solid" @click="startEditing(post)"/>
           </UTooltip>
 
-          <UTooltip v-if="(post.user.id === userStore.id || userStore.canEditAnyonePosts)" text="Usuń post" @click="startDeleting(post)">
+          <UTooltip v-if="(post.user.id === userStore.id || userStore.isAdminOrModerator)" text="Usuń post" @click="startDeleting(post)">
             <UButton icon="i-lucide-x" size="md" color="error" variant="solid" />
           </UTooltip>
 

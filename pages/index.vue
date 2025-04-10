@@ -33,12 +33,14 @@
                     <div class="text-sm text-gray-400">odpowiedzi</div> <!-- Tekst "odpowiedzi" -->
                   </div>
                   <div class="w-[160px] truncate">
-                    <user-img-with-popover :user="forum.latestPost.user" />
-                    
-                    <span class="text-sm">{{ forum.latestPost.topic?.name }}</span>
-                    <div class="text-sm text-center">
-                      <span class="text-gray-400">{{ formatDate(forum.latestPost.createdAt) }}</span>
-                    </div>
+                    <template v-if="forum.latestPost">
+                      <user-img-with-popover :user="forum.latestPost.user" />
+                      
+                      <span class="text-sm">{{ forum.latestPost.topic?.name }}</span>
+                      <div class="text-sm text-center">
+                        <span class="text-gray-400">{{ formatDate(forum.latestPost.createdAt) }}</span>
+                      </div>
+                    </template>
                   </div>
                 </div>   
               </div>

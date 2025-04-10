@@ -114,7 +114,7 @@ export const useUserStore = defineStore('user', () => {
 
   };
 
-  const canEditAnyonePosts = computed(() => role.value === 'admin' || role.value === 'moderator');
+  const isAdminOrModerator = computed(() => role.value === 'admin' || role.value === 'moderator');
 
   return {
     id,
@@ -124,7 +124,7 @@ export const useUserStore = defineStore('user', () => {
     createdAt,
     updatedAt,
     isLoggedIn,
-    canEditAnyonePosts,
+    isAdminOrModerator,
     setUser,
     fetchUser,
     clear,
