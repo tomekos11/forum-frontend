@@ -11,7 +11,7 @@
       :loading="isLoading"
       @click="changeReaction('like')"
     >
-      {{ post.reaction?.like }}
+      {{ _post.reaction?.like }}
     </UButton>
   
     <UButton
@@ -25,7 +25,7 @@
       :loading="isLoading"
       @click="changeReaction('dislike')"
     >
-      {{ post.reaction?.dislike }}
+      {{ _post.reaction?.dislike }}
     </UButton>
   </div>
 </template>
@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import { watchDebounced } from '@vueuse/core';
 import { useUserStore } from '~/stores/user';
-import type { Post, Reaction, ReactionDb } from '~/types/types';
+import type { Post, Reaction } from '~/types/types';
 
 
 interface Props {
@@ -79,16 +79,17 @@ watchDebounced(reactionType, () => {
 const addReaction = async () => {
   try {
 
-    const { reaction } = await $fetch<{message: string; reaction: ReactionDb }>(`${config.public.API_URL}/reaction`, {
+    const { post } = await useFetchWithAuth<{message: string; post: Post }>(`${config.public.API_URL}/reaction`, {
       method: 'POST',
       body: {
         postId: _post.value.id,
         reactionType: reactionType.value,
       },
-      credentials: 'include'
     });
 
-    reactionType.value = reaction.reactionType;
+    reactionType.value = post.myReaction || null;
+    _post.value.reaction = post.reaction;
+
   } catch (err) {
     console.error(err);
   } finally {

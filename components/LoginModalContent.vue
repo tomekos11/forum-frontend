@@ -55,6 +55,7 @@
 import { reactive, ref } from 'vue';
 import { useUserStore } from '~/stores/user';
 import type { User } from '~/types/types';
+import { useFetchWithAuth } from '../composables/useFetchWithAuth';
 
 const emit = defineEmits(['close-modal']);
 const userStore = useUserStore();
@@ -89,10 +90,9 @@ const login = async () => {
   };
 
   try {
-    const user = await $fetch<User>(`${config.public.API_URL}/login`, {
+    const user = await useFetchWithAuth<User>(`${config.public.API_URL}/login`, {
       body: loginData,
       method: 'post',
-      credentials: 'include'
     });
     
 
@@ -125,15 +125,15 @@ const register = async () => {
   };
 
   try {
-    const res = await $fetch(`${config.public.API_URL}/register`, {
+
+    const newUser = await useFetchWithAuth<User>(`${config.public.API_URL}/register`, {
       body: registerData,
       method: 'post',
-      credentials: 'include'
     });
-    
-    useUserStore().fetchUser();
 
-    console.log(res);
+    
+    useUserStore().setUser(newUser);
+
     toast.add({
       title: 'Poprawnie zarejestrowano',
       description: `Dziękujemy, ${registerData.username}`

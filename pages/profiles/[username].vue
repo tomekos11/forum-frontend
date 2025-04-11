@@ -131,9 +131,8 @@ const route = useRoute();
 const { data: user } = useAsyncData(
   `user-${route.params.username}`,
   async () => {
-    const res = await $fetch<User>(`${config.public.API_URL}/users/${route.params.username}`, {
-      credentials: 'include'
-    });
+
+    const res = await useFetchWithAuth<User>(`${config.public.API_URL}/users/${route.params.username}`);
 
     return res;
   },
@@ -175,17 +174,13 @@ const handleFileChange = (e) => {
 };
 
 const savePhoto = async () => {
-
-  const res = await $fetch<{message: string; user: User}>(`${config.public.API_URL}/users/avatar`, {
+  await useFetchWithAuth<{message: string; user: User}>(`${config.public.API_URL}/users/avatar`, {
     method: 'post',
     body: {
       username: route.params.username,
       avatar: preview.value
     },
-    credentials: 'include'
   });
-
-  console.log(res);
 
 };
 
@@ -195,14 +190,13 @@ const updateProfile = async () => {
 
   const config = useRuntimeConfig();
 
-  const { user: updatedUser } = await $fetch<{message: string; user: User}>(`${config.public.API_URL}/users/profile`, {
+  const { user: updatedUser } = await useFetchWithAuth<{message: string; user: User}>(`${config.public.API_URL}/users/profile`, {
     method: 'patch',
     body: {
       username: route.params.username,
       bio: bio.value,
       description: description.value
     },
-    credentials: 'include'
   });
 
   if(user.value && user.value.data && updatedUser.data) {

@@ -63,14 +63,13 @@ const config = useRuntimeConfig();
 const saveTopic = async () => {
   try {
 
-    const topic = await $fetch<Topic>(`${config.public.API_URL}/topics/${props.forumSlug}`, {
+    const topic = await useFetchWithAuth<Topic>(`${config.public.API_URL}/topics/${props.forumSlug}`, {
       method: 'POST',
       body: {
         name: newTopicName.value,
         isPrimary: isPrimary.value,
         postContent: firstPostContent.value
       },
-      credentials: 'include'
     });
   
     toast.add({

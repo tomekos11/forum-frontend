@@ -83,16 +83,20 @@ export const useUserStore = defineStore('user', () => {
 
   const fetchUser = async () => {
 
-    const { data: fetchedUser, error, pending } = await useAsyncData('user', async () => {
-      try {
-        const headers = import.meta.server 
-          ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
-          : {};
+    const { data: fetchedUser } = await useAsyncData('user', async () => {
 
-        const res = await $fetch<{user: User}>(`${config.public.API_URL}/check-user`, {
-          credentials: 'include',
-          headers
-        });
+      try {
+        const res = await useFetchWithAuth<{user: User}>(`${config.public.API_URL}/check-user`);
+
+        // try {
+        //   const headers = import.meta.server 
+        //     ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
+        //     : {};
+
+        //   const res = await $fetch<{user: User}>(`${config.public.API_URL}/check-user`, {
+        //     credentials: 'include',
+        //     headers
+        //   });
 
         return res.user;
       } catch (err) {

@@ -53,6 +53,7 @@ export interface Topic {
     createdAt: string;
     updatedAt: string;
     postCounter: null;
+    pinnedPost?: Post;
     posts?: Post[];
 }
 

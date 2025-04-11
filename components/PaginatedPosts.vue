@@ -54,6 +54,10 @@
         <div v-if="!post.isDeleted" class="ml-auto flex gap-2 flex-col justify-between items-end">
 
           <div class="flex gap-1">
+            <UTooltip text="Wyróżnij post">
+              <UButton icon="i-lucide-badge-check" size="md" :color="isPostPinned(post) ? 'neutral' : 'primary'"  variant="ghost" />
+            </UTooltip>
+
             <UTooltip text="Odpowiedź na ten post">
               <UButton icon="i-lucide-reply" size="md" color="info" variant="solid" />
             </UTooltip>
@@ -108,10 +112,12 @@
 import type { Post } from '~/types/types';
 import { formatDate } from '~/helpers/date'; // Funkcja do formatowania dat
 import { useUserStore } from '~/stores/user';
+import { useFetchWithAuth } from '../composables/useFetchWithAuth';
 
 // Props
 interface Props {
   posts: Post[];
+  pinnedPost: Post | null;
 }
 
 interface Editing {
@@ -135,6 +141,10 @@ const deleting = ref<number | null>(null);
 
 const isDeleteModalOpen = ref(false);
 
+const isPostPinned = (post: Post) => {
+  return post.id === props.pinnedPost?.id;
+};
+
 const startEditing = (post: Post) => {
   editing.value = {
     postId: post.id,
@@ -152,13 +162,12 @@ const saveContent = async () => {
   const config = useRuntimeConfig();
 
   try {
-    await $fetch(`${config.public.API_URL}/posts`, {
+    await useFetchWithAuth(`${config.public.API_URL}/posts`, {
       body: {
         postId: editing.value.postId,
         content: editing.value.content
       },
       method: 'patch',
-      credentials: 'include'
     });
 
     const found = posts.value.find(post => post.id === editing.value?.postId);
@@ -193,12 +202,12 @@ const deletePost = async () => {
   const config = useRuntimeConfig();
 
   try {
-    await $fetch(`${config.public.API_URL}/posts`, {
+
+    await useFetchWithAuth(`${config.public.API_URL}/posts`, {
       body: {
         postId: deleting.value
       },
       method: 'delete',
-      credentials: 'include'
     });
 
     const found = posts.value.find(post => post.id === deleting.value);

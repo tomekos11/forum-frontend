@@ -12,7 +12,9 @@
     <!-- Display posts -->
     <UPagination v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2"/>
 
-    <paginated-posts v-if="posts" :posts="posts" class="mt-5" />
+    <pinned-post v-if="response?.topic && response.topic.pinnedPost" :post="response.topic.pinnedPost" />
+
+    <paginated-posts v-if="posts" :posts="posts" :pinned-post="response?.topic.pinnedPost || null" class="mt-5" />
 
     <UPagination  v-if="posts && posts.length" v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2" style="padding-bottom: 200px;"/>
 
@@ -36,6 +38,7 @@
 import type { BreadcrumbItem } from '@nuxt/ui';
 import { useEventBus } from '@vueuse/core';
 import { useUserStore } from '~/stores/user';
+import { useFetchWithAuth } from '~/composables/useFetchWithAuth';
 import type { Meta, Post, Topic } from '~/types/types';
 
 interface Response {
@@ -84,17 +87,11 @@ const { data: response, refresh } = useAsyncData(
   `topic-${route.params.topicSlug}-${route.query.page || 1}`,
   async () => {
 
-    const headers = import.meta.server 
-      ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
-      : {};
-          
-    const res = await $fetch<Response>(`${config.public.API_URL}/posts/${route.params.topicSlug}`, {
+    const res = await useFetchWithAuth<Response>(`${config.public.API_URL}/posts/${route.params.topicSlug}`, {
       params: {
         page: Number(route.query.page) || 1,
         perPage: 10,
       },
-      credentials: 'include',
-      headers
     });
 
     posts.value = res.data;
@@ -139,13 +136,12 @@ const addPost = async () => {
   const config = useRuntimeConfig();
 
   try {
-    const { post, message } = await $fetch<{post: Post; message: string}>(`${config.public.API_URL}/posts`, {
+    const { post, message } = await useFetchWithAuth<{post: Post; message: string}>(`${config.public.API_URL}/posts`, {
       body: {
         topicId: response.value?.topic.id,
         content: content.value
       },
       method: 'post',
-      credentials: 'include'
     });
 
     posts.value.push(post);
