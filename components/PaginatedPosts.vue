@@ -59,6 +59,10 @@
               <UButton icon="i-lucide-badge-check" size="md" :color="isPostPinned(post) ? 'primary' : 'neutral'"  :variant="isPostPinned(post) ? 'ghost' : 'soft'" @click="$emit('pin-post', post)"/>
             </UTooltip>
 
+            <UTooltip v-else-if="isPostPinned(post)" text="Wyróżniony post">
+              <UButton icon="i-lucide-badge-check" size="md" color="primary" variant="soft" />
+            </UTooltip>
+
             <UTooltip text="Odpowiedź na ten post">
               <UButton icon="i-lucide-reply" size="md" color="info" variant="solid" />
             </UTooltip>

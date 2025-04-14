@@ -9,7 +9,6 @@
             class="rounded-full w-32 h-32 object-cover"
           >
 
-          <!-- Button w prawym górnym rogu -->
           <UModal v-if="canEdit" title="Zmiana avatara użytkownika">
             <UButton
               size="xs"
@@ -139,7 +138,12 @@ const { data: user } = useAsyncData(
 const bio = ref('');
 const description = ref('');
 
-const newImg = ref({
+interface NewImg {
+  preview: string | null
+  blob: Blob | null
+}
+
+const newImg = ref<NewImg>({
   preview: user.value?.data?.image || null,
   blob: null
 });
@@ -170,7 +174,7 @@ const handleFileChange = (e) => {
     const reader = new FileReader();
 
     reader.onload = (event) => {
-      const arrayBuffer = event.target.result;
+      const arrayBuffer = event.target?.result;
       const blob = new Blob([arrayBuffer], { type: file.type });
       const objectUrl = URL.createObjectURL(blob);
 
@@ -184,8 +188,11 @@ const handleFileChange = (e) => {
 
 const savePhoto = async () => {
   const formData = new FormData();
-  formData.append('avatar', newImg.value.blob);
-  formData.append('username', route.params.username);
+  if(newImg.value.blob) {
+    formData.append('avatar', newImg.value.blob);
+  }
+  
+  formData.append('username', route.params.username.toString());
 
   try {
     const { data: userData } = await useFetchWithAuth<{message: string; data: UserData}>('/users/avatar', {

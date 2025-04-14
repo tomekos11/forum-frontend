@@ -10,7 +10,28 @@
     </div>
 
     <!-- Display posts -->
-    <UPagination v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2"/>
+    <!-- <UPagination v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2"/> -->
+      
+    <div class="flex flex-wrap items-center justify-between mt-5 mb-2">
+      <!-- Sortowanie -->
+      <USelect
+        v-model="sortBy"
+        trailing-icon="i-lucide-arrow-down"
+
+        size="md"
+        :items="sortingOptions"
+        class="w-48"
+        @update:model-value="refresh()"
+      />
+
+      <!-- Paginacja -->
+      <UPagination
+        v-model:page="page"
+        :items-per-page="response?.meta.perPage"
+        :total="response?.meta.total || 0"
+        class="mb-2 sm:mb-0"
+      />
+    </div>
 
     <pinned-post v-if="response?.topic && response.topic.pinnedPost" :post="response.topic.pinnedPost" class="mb-2"/>
 
@@ -53,6 +74,22 @@ const router = useRouter();
 const toast = useToast();
 const userBus = useEventBus<string>('user');
 
+const sortingOptions = ref([
+  [
+    { value: 'created_at_asc', label: 'Najnowsze', key: 'created_at', order: 'asc' },
+    { value: 'created_at_desc', label: 'Najstarsze', key: 'created_at', order: 'desc' }
+  ],
+  [
+    { value: 'reaction_count_asc', label: 'Największa ilość reakcji', key: 'reaction_count', order: 'asc'  },
+    { value: 'reaction_count_desc', label: 'Najmniejsza ilość reakcji', key: 'reaction_count', order: 'desc'  }
+  ]
+]);
+
+const sortBy = ref(sortingOptions.value[0][0].value);
+
+const sortByKey = computed(() => sortingOptions.value.flat().find(el => el.value === sortBy.value)?.key);
+const sortByOrder = computed(() => sortingOptions.value.flat().find(el => el.value === sortBy.value)?.order);
+
 const content = ref('');
 
 const items= computed<BreadcrumbItem[]>(() => [
@@ -84,13 +121,15 @@ const { data: topicName } = useFetch<string>(`${config.public.API_URL}/topics/na
 });
 
 const { data: response, refresh } = useAsyncData(
-  `topic-${route.params.topicSlug}-${useUserStore().username}-${route.query.page || 1}`,
+  `topic-${route.params.topicSlug}-${useUserStore().username}-${route.query.page || 1}-${sortBy.value}`,
   async () => {
 
     const res = await useFetchWithAuth<Response>(`/posts/${route.params.topicSlug}`, {
       params: {
         page: Number(route.query.page) || 1,
         perPage: 10,
+        sortBy: sortByKey.value,
+        order: sortByOrder.value
       },
     });
 
