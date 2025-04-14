@@ -12,7 +12,7 @@
           <UPopover v-model="isDropdownOpen" placement="bottom-end" @close="isDropdownOpen = false">
 
             <div @click="isDropdownOpen = true">
-              <UAvatar src="https://github.com/benjamincanac.png" />
+              <UAvatar :src="userStore.data?.image || ''" />
 
               {{ userStore.username }}
             </div>

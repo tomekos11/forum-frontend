@@ -29,13 +29,11 @@
                   Aby zmienić zdjęcie naciśnij poniższy guzik i wybierz zdjęcie, które się będzie wyświetlało innym użytkownikom.
                 </div>
     
-
                 <img
-                  :src="preview || defaultAvatar"
+                  :src="newImg.preview || defaultAvatar"
                   alt="Avatar"
                   class="rounded-full w-32 h-32 object-cover my-2 mx-auto"
                 >
-
                 
                 <!-- Ukryty input -->
                 <input
@@ -46,10 +44,10 @@
                   @change="handleFileChange"
                 >
 
-                <UButton :label="!preview ? 'Dodaj zdjęcie' : 'Zmień zdjęcie'" @click="selectFile" />
+                <UButton :label="!newImg.preview ? 'Dodaj zdjęcie' : 'Zmień zdjęcie'" @click="selectFile" />
   
                 <!-- Opcjonalnie: przycisk Zapisz -->
-                <UButton v-if="preview" color="primary" class="ml-2" @click="savePhoto">
+                <UButton v-if="newImg.preview" color="primary" class="ml-2" @click="savePhoto">
                   Zapisz zdjęcie
                 </UButton>
               </UCard>
@@ -118,23 +116,22 @@
 <script setup lang="ts">
 import { UCard } from '#components';
 import { useUserStore } from '~/stores/user';
-import type { User } from '~/types/types';
+import type { User, UserData } from '~/types/types';
 
 const userStore = useUserStore();
 const canEdit = computed(() => userStore.username === route.params.username || ['admin', 'moderator'].includes(userStore.role));
 const searchQuery = ref('');
 const showEditProfileModal = ref(false);
 
-const config = useRuntimeConfig();
 const route = useRoute();
 
 const { data: user } = useAsyncData(
   `user-${route.params.username}`,
   async () => {
 
-    const res = await useFetchWithAuth<User>(`/users/${route.params.username}`);
+    const user = await useFetchWithAuth<User>(`/users/${route.params.username}`);
 
-    return res;
+    return user;
   },
   { server: true }
 );
@@ -142,18 +139,23 @@ const { data: user } = useAsyncData(
 const bio = ref('');
 const description = ref('');
 
+const newImg = ref({
+  preview: user.value?.data?.image || null,
+  blob: null
+});
+
+
 watch(
   () => user.value,
   (newUser) => {
     if (newUser && newUser.data) {
       bio.value = newUser.data.bio || '';
       description.value = newUser.data.description || '';
+      newImg.value.preview = user.value?.data?.image || null;
     }
   },
   { immediate: true }
 );
-
-const preview = ref(user.value?.data?.image || null);
 
 const fileInput = useTemplateRef('fileInput');
 const defaultAvatar = 'https://placehold.co/150x150?text=Avatar';
@@ -166,21 +168,47 @@ const handleFileChange = (e) => {
   const file = e.target.files[0];
   if (file) {
     const reader = new FileReader();
+
     reader.onload = (event) => {
-      preview.value = event.target.result;
+      const arrayBuffer = event.target.result;
+      const blob = new Blob([arrayBuffer], { type: file.type });
+      const objectUrl = URL.createObjectURL(blob);
+
+      newImg.value.preview = objectUrl;
+      newImg.value.blob = blob;
     };
-    reader.readAsDataURL(file);
+
+    reader.readAsArrayBuffer(file);
   }
 };
 
 const savePhoto = async () => {
-  await useFetchWithAuth<{message: string; user: User}>('/users/avatar', {
-    method: 'post',
-    body: {
-      username: route.params.username,
-      avatar: preview.value
-    },
-  });
+  const formData = new FormData();
+  formData.append('avatar', newImg.value.blob);
+  formData.append('username', route.params.username);
+
+  try {
+    const { data: userData } = await useFetchWithAuth<{message: string; data: UserData}>('/users/avatar', {
+      method: 'post',
+      body: formData
+    });
+
+    if(user.value) {
+      user.value.data = userData;
+
+      if(user.value.id === userStore.id) {
+        userStore.data = userData;
+      }
+    }
+
+    toast.add({
+      title: 'Profil użytkownika',
+      description: 'Poprawnie zmieniono zdjęcie'
+    });
+  } catch (err) {
+    console.error(err);
+  }
+  
 
 };
 
