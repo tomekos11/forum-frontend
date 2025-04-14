@@ -12,9 +12,9 @@
     <!-- Display posts -->
     <UPagination v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2"/>
 
-    <pinned-post v-if="response?.topic && response.topic.pinnedPost" :post="response.topic.pinnedPost" />
+    <pinned-post v-if="response?.topic && response.topic.pinnedPost" :post="response.topic.pinnedPost" class="mb-2"/>
 
-    <paginated-posts v-if="posts" :posts="posts" :pinned-post="response?.topic.pinnedPost || null" class="mt-5" />
+    <paginated-posts v-if="posts" :posts="posts" :pinned-post="response?.topic.pinnedPost || null" class="mt-5" @pin-post="pinPost" />
 
     <UPagination  v-if="posts && posts.length" v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2" style="padding-bottom: 200px;"/>
 
@@ -84,10 +84,10 @@ const { data: topicName } = useFetch<string>(`${config.public.API_URL}/topics/na
 });
 
 const { data: response, refresh } = useAsyncData(
-  `topic-${route.params.topicSlug}-${route.query.page || 1}`,
+  `topic-${route.params.topicSlug}-${useUserStore().username}-${route.query.page || 1}`,
   async () => {
 
-    const res = await useFetchWithAuth<Response>(`${config.public.API_URL}/posts/${route.params.topicSlug}`, {
+    const res = await useFetchWithAuth<Response>(`/posts/${route.params.topicSlug}`, {
       params: {
         page: Number(route.query.page) || 1,
         perPage: 10,
@@ -100,6 +100,10 @@ const { data: response, refresh } = useAsyncData(
   },
   { server: true }
 );
+
+watch(() => useUserStore().isLoggedIn, async () => {
+  setTimeout(() => refresh(), 100);
+});
 
 const page = ref(Number(route.query.page) || 1);
 
@@ -133,10 +137,8 @@ const posts = ref<Post[]>(response.value?.data || []);
 const addPost = async () => {
   if(!content.value) return;
 
-  const config = useRuntimeConfig();
-
   try {
-    const { post, message } = await useFetchWithAuth<{post: Post; message: string}>(`${config.public.API_URL}/posts`, {
+    const { post, message } = await useFetchWithAuth<{post: Post; message: string}>('/posts', {
       body: {
         topicId: response.value?.topic.id,
         content: content.value
@@ -156,6 +158,33 @@ const addPost = async () => {
       title: 'Ups wystąpił problem',
       description: errorMessage
     });
+  }
+};
+
+const pinPost = async (post: Post) => {
+  if(response.value?.topic.pinnedPost?.id === post.id) return;
+
+
+  try {
+    const { message, topic } = await useFetchWithAuth<{message: string; topic: Topic}>('/posts/pin', {
+      body: {
+        topicId: post.topicId,
+        postId: post.id,
+      },
+      method: 'POST'
+    });
+
+
+    if(response.value) {
+      response.value.topic = topic;
+    }
+    
+    toast.add({
+      title: message,
+    });
+
+  } catch (e) {
+    console.error(e);
   }
 };
 </script>

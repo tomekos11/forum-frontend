@@ -58,12 +58,10 @@ const newTopicName = ref('');
 const firstPostContent = ref('');
 const isPrimary = ref(false);
 
-const config = useRuntimeConfig();
-
 const saveTopic = async () => {
   try {
 
-    const topic = await useFetchWithAuth<Topic>(`${config.public.API_URL}/topics/${props.forumSlug}`, {
+    const topic = await useFetchWithAuth<Topic>(`/topics/${props.forumSlug}`, {
       method: 'POST',
       body: {
         name: newTopicName.value,

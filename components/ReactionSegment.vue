@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { watchDebounced } from '@vueuse/core';
+import { useDebounceFn } from '@vueuse/core';
 import { useUserStore } from '~/stores/user';
 import type { Post, Reaction } from '~/types/types';
 
@@ -44,6 +44,12 @@ const props = defineProps<Props>();
 
 const _post = ref(props.post);
 
+watch(() => props.post, (nv) => {
+  _post.value = nv;
+
+  reactionType.value = props.post.myReaction || null;
+});
+
 const userStore = useUserStore();
 const toast = useToast();
 const isLoading = ref(false);
@@ -51,11 +57,11 @@ const isLoading = ref(false);
 const changeReaction = (newReaction: Reaction) => {
   if(userStore.isLoggedIn) {
     if(reactionType.value === newReaction) {
-      // kasowanie jeśli taka sama
       reactionType.value = null;
     } else {
       reactionType.value = newReaction;
     }
+    addReactionDebounced();
     isLoading.value = true;
   } else {
     toast.add({
@@ -68,18 +74,15 @@ const changeReaction = (newReaction: Reaction) => {
 
 const reactionType = ref<Reaction>(props.post.myReaction || null);
 
-const config = useRuntimeConfig();
-
-watchDebounced(reactionType, () => {
+const addReactionDebounced = useDebounceFn(() => {
   addReaction();
-}, {
-  debounce: 700
-});
+}, 1000);
+
 
 const addReaction = async () => {
   try {
 
-    const { post } = await useFetchWithAuth<{message: string; post: Post }>(`${config.public.API_URL}/reaction`, {
+    const { post } = await useFetchWithAuth<{message: string; post: Post }>('/reaction', {
       method: 'POST',
       body: {
         postId: _post.value.id,

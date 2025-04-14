@@ -132,7 +132,7 @@ const { data: user } = useAsyncData(
   `user-${route.params.username}`,
   async () => {
 
-    const res = await useFetchWithAuth<User>(`${config.public.API_URL}/users/${route.params.username}`);
+    const res = await useFetchWithAuth<User>(`/users/${route.params.username}`);
 
     return res;
   },
@@ -174,7 +174,7 @@ const handleFileChange = (e) => {
 };
 
 const savePhoto = async () => {
-  await useFetchWithAuth<{message: string; user: User}>(`${config.public.API_URL}/users/avatar`, {
+  await useFetchWithAuth<{message: string; user: User}>('/users/avatar', {
     method: 'post',
     body: {
       username: route.params.username,
@@ -187,10 +187,7 @@ const savePhoto = async () => {
 const toast = useToast();
 
 const updateProfile = async () => {
-
-  const config = useRuntimeConfig();
-
-  const { user: updatedUser } = await useFetchWithAuth<{message: string; user: User}>(`${config.public.API_URL}/users/profile`, {
+  const { user: updatedUser } = await useFetchWithAuth<{message: string; user: User}>('/users/profile', {
     method: 'patch',
     body: {
       username: route.params.username,

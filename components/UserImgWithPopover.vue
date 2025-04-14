@@ -1,6 +1,8 @@
 <template>
   <UPopover mode="hover" :open-delay="400" :close-delay="100">
-    <UAvatar :src="user.data?.image || ''" size="sm" class="mr-1"/>
+    <img v-if="size === 'big'" class="rounded-sm mr-5 w-[100px] max-h-[100px]" :src="user.data?.image || ''">
+    <UAvatar v-else :src="user.data?.image || ''" size="sm" class="mr-1"/>
+    
     <template #content>
       <UCard>
         <template #header>
@@ -34,6 +36,7 @@ import type { User } from '~/types/types';
 
 interface Props {
   user: User
+  size?: 'big'
 }
 
 defineProps<Props>();

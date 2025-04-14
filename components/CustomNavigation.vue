@@ -9,10 +9,7 @@
     > 
       <template #user>
         <template v-if="userStore.isLoggedIn">
-          <!-- Dropdown menu -->
           <UPopover v-model="isDropdownOpen" placement="bottom-end" @close="isDropdownOpen = false">
-            <!-- Główny przycisk -->
-            <!-- <UButton label="Pokaż menu" class="bg-blue-500 text-white hover:bg-blue-600" /> -->
 
             <div @click="isDropdownOpen = true">
               <UAvatar src="https://github.com/benjamincanac.png" />
@@ -20,7 +17,6 @@
               {{ userStore.username }}
             </div>
 
-            <!-- Zawartość rozwijanego menu -->
             <template #content>
               <div class="dropdown-menu">
                 <UButton 

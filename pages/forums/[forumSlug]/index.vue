@@ -90,7 +90,7 @@ const { data: response, refresh } = useAsyncData(
   `forum-${route.params.forumSlug}-${route.query.page}`,
   async () => {
 
-    const res = await useFetchWithAuth<Response>(`${config.public.API_URL}/topics/${route.params.forumSlug}`, {
+    const res = await useFetchWithAuth<Response>(`/topics/${route.params.forumSlug}`, {
       params: {
         page: Number(route.query.page) || 1,
         perPage: 10,

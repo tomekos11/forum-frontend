@@ -82,15 +82,13 @@ const onSubmit = async () => {
 };
 
 const login = async () => {
-  const config = useRuntimeConfig();
-
   const loginData = {
     username: form.username,
     password: form.password
   };
 
   try {
-    const user = await useFetchWithAuth<User>(`${config.public.API_URL}/login`, {
+    const user = await useFetchWithAuth<User>('/login', {
       body: loginData,
       method: 'post',
     });
@@ -116,7 +114,6 @@ const login = async () => {
 };
 
 const register = async () => {
-  const config = useRuntimeConfig();
 
   const registerData = {
     username: form.username,
@@ -126,7 +123,7 @@ const register = async () => {
 
   try {
 
-    const newUser = await useFetchWithAuth<User>(`${config.public.API_URL}/register`, {
+    const newUser = await useFetchWithAuth<User>('/register', {
       body: registerData,
       method: 'post',
     });

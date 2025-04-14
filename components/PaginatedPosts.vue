@@ -20,7 +20,8 @@
       class="p-4 rounded-lg shadow-sm bg-slate-800"
     >
       <div class="flex">
-        <img class="rounded-sm mr-5 w-[100px] max-h-[100px]" src="https://github.com/benjamincanac.png">
+        <UserImgWithPopover :user="post.user" size="big" />
+
         <div>
           <h3 class="font-semibold text-lg text-green-600">{{ post.user.username }}</h3>
 
@@ -54,8 +55,8 @@
         <div v-if="!post.isDeleted" class="ml-auto flex gap-2 flex-col justify-between items-end">
 
           <div class="flex gap-1">
-            <UTooltip text="Wyróżnij post">
-              <UButton icon="i-lucide-badge-check" size="md" :color="isPostPinned(post) ? 'neutral' : 'primary'"  variant="ghost" />
+            <UTooltip v-if="userStore.isAdminOrModerator" :text="isPostPinned(post) ? 'Wyróżniony post' : 'Wyróżnij post'">
+              <UButton icon="i-lucide-badge-check" size="md" :color="isPostPinned(post) ? 'primary' : 'neutral'"  :variant="isPostPinned(post) ? 'ghost' : 'soft'" @click="$emit('pin-post', post)"/>
             </UTooltip>
 
             <UTooltip text="Odpowiedź na ten post">
@@ -127,9 +128,13 @@ interface Editing {
 
 const props = defineProps<Props>();
 
+defineEmits(['pin-post']);
+
 const posts = ref(props.posts);
 
 watch(() => props.posts, (nv) => {
+
+  console.log(props.posts);
   posts.value = nv;
 });
 
@@ -159,10 +164,8 @@ const cancelEditing = () => {
 const saveContent = async () => {
   if(!editing.value) return;
 
-  const config = useRuntimeConfig();
-
   try {
-    await useFetchWithAuth(`${config.public.API_URL}/posts`, {
+    await useFetchWithAuth('/posts', {
       body: {
         postId: editing.value.postId,
         content: editing.value.content
@@ -199,11 +202,9 @@ const startDeleting = (post: Post) => {
 const deletePost = async () => {
   if(!deleting.value) return;
 
-  const config = useRuntimeConfig();
-
   try {
 
-    await useFetchWithAuth(`${config.public.API_URL}/posts`, {
+    await useFetchWithAuth('/posts', {
       body: {
         postId: deleting.value
       },
