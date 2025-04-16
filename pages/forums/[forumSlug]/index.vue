@@ -42,7 +42,7 @@
             :to="`/forums/${route.params.forumSlug}/topics/${topic.slug}`"
             class="block"
           >
-            <UCard class="cursor-pointer hover:bg-green-700 transition">
+            <UCard :class="`cursor-pointer hover:bg-green-700 transition ${key === 'primaryTopics' ? 'bg-slate-800 mb-2' : ''}`">
               <template #header>
                 <div class="flex flex-wrap items-center justify-between w-full gap-4">
                   <!-- Lewa strona -->
