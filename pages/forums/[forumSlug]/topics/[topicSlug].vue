@@ -14,7 +14,7 @@
       
     <div class="flex flex-wrap items-center justify-between mt-5 mb-2">
       <!-- Sortowanie -->
-      <USelect
+      <!-- <USelect
         v-model="sortBy"
         trailing-icon="i-lucide-arrow-down"
 
@@ -22,7 +22,7 @@
         :items="sortingOptions"
         class="w-48"
         @update:model-value="refresh()"
-      />
+      /> -->
 
       <!-- Paginacja -->
       <UPagination
@@ -31,6 +31,40 @@
         :total="response?.meta.total || 0"
         class="mb-2 sm:mb-0"
       />
+
+
+      <div>
+        <UIcon v-if="response?.topic.isClosed" name="i-lucide-lock" size="xs" />
+
+        <UDropdownMenu
+          :items="[{}]"
+        >
+          <UButton variant="ghost" aria-label="Ustawienia" icon="i-lucide-settings">
+            Opcje
+          </UButton>
+
+          <template #item>
+            <div class="flex flex-col gap-1">
+              <USelect
+                v-model="sortBy"
+                trailing-icon="i-lucide-arrow-down"
+
+                size="md"
+                :items="sortingOptions"
+                class="w-48"
+                @update:model-value="refresh()"
+              />
+
+              <UButton v-if="!response?.topic.isClosed" label="Zamknij temat" variant="ghost" color="neutral" icon="i-lucide-lock" @click="closeTopic" />
+              <UButton v-else label="Otwórz temat" variant="ghost" color="neutral" icon="i-lucide-key" @click="openTopic" />
+
+              <UButton label="Obserwuj temat" variant="ghost" color="neutral" icon="i-lucide-eye" />
+
+            </div>
+          </template>
+        </UDropdownMenu>
+      </div>
+
     </div>
 
     <pinned-post v-if="response?.topic && response.topic.pinnedPost" :post="response.topic.pinnedPost" class="mb-2"/>
@@ -41,8 +75,11 @@
 
     <!-- Input area for new post -->
     <div v-if="posts && posts.length" class="fixed bottom-0 left-0 w-full  p-2 border-t shadow-md " style="background: var(--ui-bg)">
-      <template v-if="useUserStore().isLoggedIn">
-        
+      <template v-if="response?.topic.isClosed">
+        <UIcon name="i-lucide-lock" size="xs" />
+        Post jest zamknięty. Nie można udzielić odpowiedzi
+      </template>
+      <template v-else-if="useUserStore().isLoggedIn">
         <UTextarea v-model="content" autoresize class="block"/>
         <UButton label="Dodaj post" class="mx-auto block" @click="addPost"/>
       </template>
@@ -76,8 +113,8 @@ const userBus = useEventBus<string>('user');
 
 const sortingOptions = ref([
   [
-    { value: 'created_at_asc', label: 'Najnowsze', key: 'created_at', order: 'asc' },
-    { value: 'created_at_desc', label: 'Najstarsze', key: 'created_at', order: 'desc' }
+    { value: 'created_at_asc', label: 'Najnowsze', key: 'created_at', order: 'desc' },
+    { value: 'created_at_desc', label: 'Najstarsze', key: 'created_at', order: 'asc' }
   ],
   [
     { value: 'reaction_count_asc', label: 'Największa ilość reakcji', key: 'reaction_count', order: 'asc'  },
@@ -129,7 +166,7 @@ const { data: response, refresh } = useAsyncData(
         page: Number(route.query.page) || 1,
         perPage: 10,
         sortBy: sortByKey.value,
-        order: sortByOrder.value
+        order: sortByOrder.value,
       },
     });
 
@@ -225,5 +262,35 @@ const pinPost = async (post: Post) => {
   } catch (e) {
     console.error(e);
   }
+};
+
+const closeTopic = async () => {
+  if(!response.value?.topic) return;
+  
+  try {
+    const res = await useFetchWithAuth<Topic>(`/topics/${response.value.topic.slug}/close`, {
+      method: 'PATCH',
+    });
+
+    response.value.topic = res;
+  } catch (err) {
+    console.error(err);
+  }
+  
+};
+
+const openTopic = async () => {
+  if(!response.value?.topic) return;
+  
+  try {
+    const res = await useFetchWithAuth<Topic>(`/topics/${response.value.topic.slug}/open`, {
+      method: 'PATCH',
+    });
+
+    response.value.topic = res;
+  } catch (err) {
+    console.error(err);
+  }
+
 };
 </script>

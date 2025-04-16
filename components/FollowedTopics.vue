@@ -1,0 +1,72 @@
+<template>
+  <UAccordion v-if="user?.followedTopics" :items="user.followedTopics">
+    <template #leading="{ item: topic }">
+      <div class="flex items-center gap-2">
+        <NuxtLink
+          :to="`/forums/${topic.forum?.slug}/topics/${topic.slug}`"
+          class="text-green-600 underline hover:no-underline"
+        >
+          {{ topic.name }}
+        </NuxtLink>
+      </div>
+    </template>
+
+    <template #body="{ item: topic }">
+      <p class="text-sm text-gray-500">
+        Tutaj potencjalny opis tematu <strong>{{ topic.name }}</strong> 
+      </p>
+
+      <UButton
+        v-if="canUnfollow"
+        color="error"
+        size="xs"
+        variant="ghost"
+        icon="i-heroicons-x-mark"
+        class="mt-3"
+        @click.stop="unfollow(topic)"
+      >
+        Odobserwuj
+      </UButton>
+    </template>
+  </UAccordion>
+
+  <div v-if="!user?.followedTopics?.length" class="text-sm mt-4">
+    Brak obserwowanych tematów
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useUserStore } from '~/stores/user';
+import type { Topic, User } from '~/types/types';
+
+const user = defineModel<User>('user');
+const route = useRoute();
+const userStore = useUserStore();
+
+const canUnfollow = computed(() => userStore.username === route.params.username);
+
+const toast = useToast();
+
+interface Response {
+  followed: boolean;
+  message: string;
+  topic: Topic;
+}
+
+const unfollow = async (topic: Topic) => {
+
+  const res = await useFetchWithAuth<Response>('/topics/follow', {
+    method: 'POST',
+    body: {
+      topicId: topic.id,
+      follow: false
+    }
+  });
+
+  toast.add({
+    title: res.message
+  });
+
+  console.log(res);
+};
+</script>

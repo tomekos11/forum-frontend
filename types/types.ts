@@ -9,10 +9,19 @@ export interface ReactionDb {
     updatedAt: string | null;
 }
 
+export interface Stats {
+    posts: number;
+    repMinus: number;
+    repPlus: number;
+}
+
 export interface UserData {
+    id: number;
+    userId: number;
     bio: string | null;
     description: string | null;
     image: string | null;
+    stats: Stats | null;
     createdAt: string | null;
     updatedAt: string | null;
 }
@@ -22,6 +31,7 @@ export interface User {
     username: string | null;
     role: 'user' | 'marketing' | 'moderator' | 'admin' | null;
     data?: UserData | null;
+    followedTopics?: Topic[] | null;
     createdAt: string | null;
     updatedAt: string | null;
   }
@@ -49,12 +59,14 @@ export interface Topic {
     forumId: number;
     name: string;
     slug: string;
-    isPrimary: 0;
+    isPrimary: boolean;
+    isClosed: boolean;
     createdAt: string;
     updatedAt: string;
     postCounter: null;
     pinnedPost?: Post;
     posts?: Post[];
+    forum?: Forum;
 }
 
 export interface Meta {

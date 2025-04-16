@@ -11,8 +11,26 @@
       <div class="text-xl text-gray-500 font-bold text-center">{{ forumName }}</div>
 
       <div class="flex justify-between mt-10 mb-2">
+
+        <USelect
+          v-model="sortBy"
+          trailing-icon="i-lucide-arrow-down"
+
+          size="md"
+          :items="sortingOptions"
+          class="w-48"
+          @update:model-value="refresh()"
+        />
+
         <UPagination v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0"/>
 
+        <UInput
+          v-model="filter"
+          placeholder="Filtruj po nazwie"
+          label="Bio"
+          @update:model-value="debouncedRefresh"
+        />
+                    
         <add-topic-modal v-if="userStore.isLoggedIn && forumName" :forum-name="forumName" :forum-slug="$route.params.forumSlug.toString()"/>
       </div>
 
@@ -30,6 +48,7 @@
                   <!-- Lewa strona -->
                   <div class="flex items-center flex-1 sm:flex-row sm:items-center">
                     <UAvatar src="https://github.com/benjamincanac.png" size="lg" class="mr-5"/>
+                    <UIcon v-if="topic.isClosed" name="i-lucide-lock" size="xs" class="mr-2" />
                     <span class="text-sm sm:text-base whitespace-nowrap">{{ topic.name }}</span> <!-- Zapobiega zawijaniu -->
                   </div>
 
@@ -64,6 +83,7 @@
 
 <script setup lang="ts">
 import type { BreadcrumbItem } from '@nuxt/ui';
+import { useDebounceFn } from '@vueuse/core';
 import { formatDate } from '~/helpers/date';
 import { useUserStore } from '~/stores/user';
 import type { Meta, Topic } from '~/types/types';
@@ -80,6 +100,34 @@ const userStore = useUserStore();
 const config = useRuntimeConfig();
 const route = useRoute();
 
+const sortingOptions = ref([
+  [
+    { value: 'created_at_asc', label: 'Najnowsze', key: 'created_at', order: 'desc' },
+    { value: 'created_at_desc', label: 'Najstarsze', key: 'created_at', order: 'asc' }
+  ],
+  [
+    { value: 'posts_count_asc', label: 'Największa ilość odpowiedzi', key: 'posts_count', order: 'desc'  },
+    { value: 'posts_count_desc', label: 'Najmniejsza ilość odpowiedzi', key: 'posts_count', order: 'asc'  },
+  ],
+  [
+    { value: 'name_asc', label: 'Nazwa alfabetycznie rosnąco', key: 'name', order: 'asc'  },
+    { value: 'name_desc', label: 'Nazwa alfabetycznie malejąco', key: 'name', order: 'desc'  }
+  ],
+  [
+    { value: 'is_closed_asc', label: 'Otwarty', key: 'is_closed', order: 'asc'  },
+    { value: 'is_closed_desc', label: 'Zamknięty', key: 'is_closed', order: 'desc'  }
+  ]
+]);
+
+const filter = ref('');
+
+const debouncedRefresh = useDebounceFn(() => refresh(), 700);
+
+const sortBy = ref(sortingOptions.value[0][0].value);
+
+const sortByKey = computed(() => sortingOptions.value.flat().find(el => el.value === sortBy.value)?.key);
+const sortByOrder = computed(() => sortingOptions.value.flat().find(el => el.value === sortBy.value)?.order);
+
 const { data: forumName } = useFetch<string>(`${config.public.API_URL}/forums/name`, {
   params: {
     slug: route.params.forumSlug
@@ -94,6 +142,9 @@ const { data: response, refresh } = useAsyncData(
       params: {
         page: Number(route.query.page) || 1,
         perPage: 10,
+        sortBy: sortByKey.value,
+        order: sortByOrder.value,
+        filter: filter.value,
       },
     });
 

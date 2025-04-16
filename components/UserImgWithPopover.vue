@@ -21,11 +21,36 @@
             />
           </div>
         </template>
-                            
+        
         <div>
-          {{ user.data?.description }}
+          <div class="text-sm">
+            {{ user.data?.description }}
+          </div>
+
+          <div class="flex justify-between text-sm my-5">
+            <!-- <div v-for="stat in user.data?.stats" :key="stat">
+            {{ stat }}
+          </div> -->
+
+            <div class="flex flex-col items-center justify-center">
+              <div>{{ user.data?.stats?.posts }}</div>
+              <div>Postów</div>
+            </div>
+            <div class="flex flex-col items-center justify-center">
+              <div>{{ user.data?.stats?.repPlus }}</div>
+              <div>Reakcji +</div>
+            </div>
+            <div class="flex flex-col items-center justify-center">
+              <div>{{ user.data?.stats?.repMinus }}</div>
+              <div>Reakcji -</div>
+            </div>
+          </div>
+
+          <UButton label="Przejdź do profilu użytkownika" size="sm" :to="`/profiles/${user.username}`" />
         </div>
-        <UButton label="Przejdź do profilu użytkownika" :to="`/profiles/${user.username}`" />
+        
+        
+        
       </UCard>
     </template>
   </UPopover>

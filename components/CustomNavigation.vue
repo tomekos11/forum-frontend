@@ -40,7 +40,6 @@
               </div>
             </template>
           </UPopover>
-
         </template>
 
         <template v-else>
@@ -52,6 +51,54 @@
           </UModal>
         </template>
       </template>
+
+
+      <template #users-search>
+        <UPopover
+          v-model:open="isUsersListVisible"
+          :content="{
+            side: 'bottom',
+            align: 'start',
+          }"
+          
+          @close="isUsersListVisible = false"
+        >
+          <!-- To jest trigger popovera! -->
+          <div class="relative inline-block w-full">
+            <UInput
+              v-model="usernameToSearch"
+              placeholder="Użytkownik..."
+              @update:model-value="debouncedSearchUsers"
+            />
+          </div>
+          
+
+          <template #content>
+            <div class="p-2 w-[196px]">
+              <template v-if="usersList.length">
+                <NuxtLink
+                  v-for="user in usersList"
+                  :key="user.id"
+                  :to="`/profiles/${user.username}`"
+                  class="user-link flex items-center p-2 rounded hover:bg-slate-800 transition-colors"
+                >
+                  <UAvatar :src="user.data?.image || ''" size="xs"/>
+                  <span class="ml-2 text-sm">{{ user.username }}</span>
+                </NuxtLink>
+              </template>
+              <div v-else class="text-sm">
+                Nie znaleziono użytkownika
+              </div>
+            </div>
+          </template>
+        </UPopover>
+      </template>
+
+      <!-- <template #notifications>
+        <UChip inset color="error">
+          <UButton icon="i-lucide-bell" variant="ghost" color="neutral"/>
+        </UChip>
+      </template> -->
       
     </UNavigationMenu >
   </nav>
@@ -59,11 +106,13 @@
 
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui';
-import { useEventBus } from '@vueuse/core';
+import { useDebounceFn, useEventBus } from '@vueuse/core';
 import { useForumsStore } from '~/stores/forum';
 import { useUserStore } from '~/stores/user';
+import type { User } from '~/types/types';
 
 const isDropdownOpen = ref(false);
+const isUsersListVisible = ref(false);
 const showModal = ref(false);
 
 const userStore = useUserStore();
@@ -76,26 +125,22 @@ const items = computed<NavigationMenuItem[][]>(() => ([
       icon: 'i-lucide-book-open',
       children: forumsStore.navigationForums
     },
+    {
+      slot: 'users-search'
+    }
   ],
   
   [
     {
-      label: 'GitHub',
-      icon: 'i-simple-icons-github',
-      badge: '3.8k',
-      to: 'https://github.com/nuxt/ui',
-      target: '_blank'
-    },
-    {
-      label: 'Help',
-      icon: 'i-lucide-circle-help',
-      disabled: true
+      slot: 'notifications',
     },
     {
       slot: 'user'
     },
   ]
 ]));
+
+const usernameToSearch = ref('');
 
 const showLoginModal = () => {
   showModal.value = true;
@@ -113,6 +158,28 @@ watch(() => userStore.isLoggedIn, (nv) => {
   console.log(nv);
 }, {
   immediate: true
+});
+
+const debouncedSearchUsers = useDebounceFn(() => findUsers(), 700);
+
+const usersList = ref<User[]>([]);
+
+const findUsers = async () => {
+  if(!usernameToSearch.value) return;
+
+  usersList.value = await useFetchWithAuth<User[]>('/users/find', {
+    params: {
+      name: usernameToSearch.value
+    }
+  });
+
+  isUsersListVisible.value = true;
+};
+
+watch(usernameToSearch, (nv) => {
+  if(!nv) {
+    usersList.value = [];
+  }
 });
 </script>
 
@@ -139,5 +206,11 @@ watch(() => userStore.isLoggedIn, (nv) => {
 
 .dropdown-item:hover {
   background-color: #f3f4f6;
+}
+
+.user-link {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 </style>
