@@ -1,6 +1,7 @@
 <template>
-  <UContainer class="py-10">
-    <UCard class="max-w-md mx-auto text-center">
+  <UContainer class="py-10 flex sm:flex-row flex-col gap-6">
+    
+    <UCard class="text-center bg-slate-950" style="width:min(500px,100%)">
       <div v-if="user" class="flex flex-col items-center space-y-4">
         <div class="relative inline-block w-fit">
           <img
@@ -20,7 +21,7 @@
 
         </div>
 
-        <UCard class="max-w-md mx-auto text-center mt-5 w-full">
+        <UCard class="max-w-md mx-auto text-center mt-5 w-full ">
           <div class="flex justify-evenly text-sm flex-wrap">
             <div class="flex flex-col items-center justify-center">
               <div>{{ user.data?.stats?.posts }}</div>
@@ -51,8 +52,13 @@
       </template>
     </UCard>
 
-    <UCard>
-      Obserwowane tematy
+    <UCard class="grow">
+      <div class="flex justify-between">
+        <span>
+          Obserwowane tematy
+        </span>
+        <UIcon name="i-lucide-eye" />
+      </div> 
       <FollowedTopics v-if="user" v-model:user="user" />
     </UCard>
   </UContainer>

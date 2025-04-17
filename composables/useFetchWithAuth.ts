@@ -4,7 +4,7 @@ export const useFetchWithAuth = <T>(url: string, options: any = {}): Promise<T> 
   const headers = import.meta.server
     ? { cookie: useRequestHeaders(['cookie']).cookie || '' }
     : {};
-  
+    
   return $fetch<T>(config.public.API_URL + url, {
     credentials: 'include',
     headers,

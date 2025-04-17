@@ -32,7 +32,7 @@
             <template #footer>
               <div class="flex justify-end gap-2 ml-auto">
                 <UButton label="Zamknij" color="error" @click="showUnpinPostModal = false"/>
-                <UButton label="Odepnij post" @click="unpinPost"/>
+                <UButton label="Odepnij post" @click="$emit('unpin', post)"/>
               </div>
             </template>
           </UModal>
@@ -59,29 +59,31 @@ interface Props {
   post: Post;
 }
 
-const props = defineProps<Props>();
-const toast = useToast();
+defineProps<Props>();
+useToast();
 const userStore = useUserStore();
 
 const showUnpinPostModal = ref(false);
 
-const unpinPost = async () => {
-  try {
-    const { message } = await useFetchWithAuth<{message: string; topic: Topic}>('/posts/pin', {
-      body: {
-        topicId: props.post.topicId,
-        postId: null,
-      },
-      method: 'POST'
-    });
-    
-    toast.add({
-      title: message,
-    });
+defineEmits(['unpin']);
 
-    showUnpinPostModal.value = false;
-  } catch (e) {
-    console.error(e);
-  }
-};
+// const unpinPost = async () => {
+//   try {
+//     const { message } = await useFetchWithAuth<{message: string; topic: Topic}>('/posts/pin', {
+//       body: {
+//         topicId: props.post.topicId,
+//         postId: null,
+//       },
+//       method: 'POST'
+//     });
+    
+//     toast.add({
+//       title: message,
+//     });
+
+//     showUnpinPostModal.value = false;
+//   } catch (e) {
+//     console.error(e);
+//   }
+// };
 </script>

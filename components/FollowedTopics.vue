@@ -1,13 +1,17 @@
 <template>
-  <UAccordion v-if="user?.followedTopics" :items="user.followedTopics">
+  <UAccordion
+    v-if="user?.followedTopics"
+    :ui="{
+      body: 'px-3',
+      header: 'hover:bg-green-800 px-3 transition'
+    }"
+    :items="user.followedTopics"
+  >
     <template #leading="{ item: topic }">
-      <div class="flex items-center gap-2">
-        <NuxtLink
-          :to="`/forums/${topic.forum?.slug}/topics/${topic.slug}`"
-          class="text-green-600 underline hover:no-underline"
-        >
+      <div class="flex items-center gap-2 ">
+        <div>
           {{ topic.name }}
-        </NuxtLink>
+        </div>
       </div>
     </template>
 
@@ -17,12 +21,22 @@
       </p>
 
       <UButton
+        color="primary"
+        size="xs"
+        variant="ghost"
+        class="mt-3 mr-2"
+        :to="`/forums/${topic.forum?.slug}/topics/${topic.slug}`"
+      >
+        Przejdź do tematu
+      </UButton>
+
+      <UButton
         v-if="canUnfollow"
         color="error"
         size="xs"
         variant="ghost"
         icon="i-heroicons-x-mark"
-        class="mt-3"
+        class="mt-3 cursor-pointer"
         @click.stop="unfollow(topic)"
       >
         Odobserwuj
@@ -67,6 +81,13 @@ const unfollow = async (topic: Topic) => {
     title: res.message
   });
 
-  console.log(res);
 };
+
+// const active = ref('0');
+
+// onMounted(() => {
+//   setInterval(() => {
+//     active.value = String((Number(active.value) + 1) % (user.value?.followedTopics?.length || 1));
+//   }, 2000);
+// });
 </script>

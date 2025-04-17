@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { useUserStore } from '~/stores/user';
-import type { User } from '~/types/types';
+import type { Notification, User } from '~/types/types';
 import { useFetchWithAuth } from '../composables/useFetchWithAuth';
 
 const emit = defineEmits(['close-modal']);
@@ -88,14 +88,14 @@ const login = async () => {
   };
 
   try {
-    const user = await useFetchWithAuth<User>('/login', {
+    const { user, notifications: nots } = await useFetchWithAuth<{user: User, notifications: Notification[] }>('/login', {
       body: loginData,
       method: 'post',
     });
     
 
     if(user) {
-      userStore.setUser(user);
+      userStore.setUser(user, nots);
     }
 
     toast.add({

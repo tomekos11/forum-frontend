@@ -1,0 +1,41 @@
+<template>
+  <div v-if="userStore.isLoggedIn">
+    <UPopover v-if="userStore.notifications?.length" :popper="{ offset: 8 }">
+      <!-- Trigger: ikona dzwonka w chipie -->
+      <UChip inset color="error">
+        <UButton
+          icon="i-lucide-bell"
+          variant="ghost"
+          color="neutral"
+        />
+      </UChip>
+
+      <!-- Zawartość popovera -->
+      <template #content>
+        <div class="w-64 max-h-80 overflow-y-auto p-2">
+          <div v-for="(notification, index) in userStore.notifications" :key="index" class="p-2 rounded hover:bg-slate-950 text-sm cursor-pointer">
+            Nowe wiadomości w temacie<br>
+            <strong>{{ notification.topicName }}</strong> w ilości: {{ notification.count }}
+            <UButton
+              icon="i-lucide-arrow-up-right"
+              size="xs"
+              variant="ghost"
+              :to="`/forums/${notification.forumSlug}/topics/${notification.topicSlug}?page=${notification.page}`"
+            />
+            
+          </div>
+        </div>
+      </template>
+    </UPopover>
+
+    <UButton v-else icon="i-lucide-bell" variant="ghost" color="neutral"/>
+  </div>
+  
+</template>
+
+<script setup lang="ts">
+import { DateTime } from 'luxon';
+import { useUserStore } from '~/stores/user';
+
+const userStore = useUserStore();
+</script>

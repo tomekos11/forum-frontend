@@ -48,6 +48,7 @@ export interface Post {
         dislike: number;
         like: number;
     }
+    notification: boolean;
     myReaction?: Reaction;
     topic?: Topic;
     user: User;
@@ -61,6 +62,7 @@ export interface Topic {
     slug: string;
     isPrimary: boolean;
     isClosed: boolean;
+    isFollowed?: boolean;
     createdAt: string;
     updatedAt: string;
     postCounter: null;
@@ -92,4 +94,13 @@ export interface Forum {
     topics: Topic[]
     latestPost: Post;
     postCounter?: number;
+}
+
+export interface Notification {
+    count: number;
+    forumSlug: string;
+    page: number;
+    perPage: number;
+    topicSlug: string;
+    topicName: string;
 }

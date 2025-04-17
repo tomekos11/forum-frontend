@@ -17,12 +17,17 @@
           :to="`/forums/${forum.slug}`"
           class="block"
         >
-          <UCard class="cursor-pointer hover:bg-green-700 transition">
+          <UCard
+            class="cursor-pointer mb-2 hover:bg-green-700 transition"
+            :ui="{
+              header: 'p-2'
+            }"
+          >
             <template #header>
               <div class="flex flex-wrap items-center justify-between w-full gap-4">
                 <!-- Lewa strona -->
                 <div class="flex items-center flex-1 sm:flex-row sm:items-center">
-                  <UAvatar src="https://github.com/benjamincanac.png" size="lg" class="mr-5"/>
+                  <UAvatar :text="forum.name[0].toUpperCase()" size="lg" class="mr-5"/>
                   <span class="text-sm sm:text-base whitespace-nowrap">{{ forum.name }}</span>
                 </div>
 

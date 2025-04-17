@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { User } from '~/types/types';
+import type { Notification, User } from '~/types/types';
 
 export const useUserStore = defineStore('user', () => {
   const id = ref<User['id']>(null);
@@ -8,6 +8,7 @@ export const useUserStore = defineStore('user', () => {
   const data = ref<User['data']>(null);
   const createdAt = ref<User['createdAt']>(null);
   const updatedAt = ref<User['updatedAt']>(null);
+  const notifications = ref<Notification[]>([]);
 
   const isLoggedIn = computed(() => !!username.value);
 
@@ -22,13 +23,14 @@ export const useUserStore = defineStore('user', () => {
     updatedAt.value = null;
   };
 
-  const setUser = (user: User) => {
+  const setUser = (user: User, nots: Notification[]) => {
     id.value = user.id;
     username.value = user.username;
     data.value = user.data;
     role.value = user.role;
     createdAt.value = user.createdAt;
     updatedAt.value = user.updatedAt;
+    notifications.value = nots;
   };
 
   const logout = async () => {
@@ -48,47 +50,17 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
-  // const fetchUser = async () => {
-
-  //   try {
-  //     const headers = import.meta.server 
-  //       ? { cookie: useRequestHeaders(['cookie']).cookie || '' } 
-  //       : {};
-
-  //     const res = await $fetch<{user: User}>(`${config.public.API_URL}/check-user`, {
-  //       credentials: 'include',
-  //       headers
-  //     });
-
-  //     id.value = res.user.id;
-  //     username.value = res.user.username;
-  //     image.value = res.user.image;
-  //     role.value = res.user.role;
-  //     createdAt.value = res.user.createdAt;
-  //     updatedAt.value = res.user.updatedAt;
-      
-  //     return { ...res.user };
-  //   } catch (err) {
-  //     console.error(err);
-  //     return {
-  //       id: null,
-  //       username: null,
-  //       image: null,
-  //       role: null,
-  //       createdAt: null,
-  //       updatedAt: null,
-  //     };
-  //   }
-  // };
-
   const fetchUser = async () => {
 
     const { data: fetchedUser } = await useAsyncData('user', async () => {
 
       try {
-        const res = await useFetchWithAuth<{user: User}>('/check-user');
+        const { user, notifications: nots } = await useFetchWithAuth<{notifications: Notification[], user: User}>('/check-user');
 
-        return res.user;
+        return {
+          user,
+          nots
+        };
       } catch (err) {
         return {
           id: null,
@@ -97,13 +69,14 @@ export const useUserStore = defineStore('user', () => {
           role: null,
           createdAt: null,
           updatedAt: null,
+          notifications: [],
         };
       }
     });
 
 
-    if (fetchedUser.value) {
-      setUser(fetchedUser.value);
+    if (fetchedUser.value && fetchedUser.value.user && fetchedUser.value.nots) {
+      setUser(fetchedUser.value.user, fetchedUser.value.nots);
     }
 
   };
@@ -119,6 +92,7 @@ export const useUserStore = defineStore('user', () => {
     updatedAt,
     isLoggedIn,
     isAdminOrModerator,
+    notifications,
     setUser,
     fetchUser,
     clear,

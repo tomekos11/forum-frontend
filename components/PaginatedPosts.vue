@@ -17,12 +17,12 @@
       v-for="(post) in posts"
       v-else
       :key="post.id"
-      class="p-4 rounded-lg shadow-sm bg-slate-800"
+      :class="`p-4 rounded-lg bg-slate-800  ${post.notification ? 'shadow-[0_4px_12px_rgba(0,255,0,0.3)]' : 'shadow-sm'}`"
     >
       <div class="flex">
         <UserImgWithPopover :user="post.user" size="big" />
 
-        <div>
+        <div class="w-full">
           <h3 class="font-semibold text-lg text-green-600">{{ post.user.username }}</h3>
 
           <!-- Tryb wyświetlania i edycji -->
@@ -31,7 +31,13 @@
           </div>
 
           <div v-else>
-            <UTextarea v-if="editing" v-model="editing.content" autoresize />
+            <UTextarea
+              v-if="editing"
+              v-model="editing.content"
+              :ui="{
+                base: 'w-full'
+              }"
+              autoresize/>
 
             <div class="mt-2 flex gap-2">
               <UButton 
@@ -53,32 +59,70 @@
         </div>
 
         <div v-if="!post.isDeleted" class="ml-auto flex gap-2 flex-col justify-between items-end">
+          <UPopover :popper="{ placement: 'bottom-end' }">
+            <UButton icon="i-lucide-more-vertical" size="md" variant="ghost" color="neutral" />
 
-          <div class="flex gap-1">
-            <UTooltip v-if="userStore.isAdminOrModerator" :text="isPostPinned(post) ? 'Wyróżniony post' : 'Wyróżnij post'">
-              <UButton icon="i-lucide-badge-check" size="md" :color="isPostPinned(post) ? 'primary' : 'neutral'"  :variant="isPostPinned(post) ? 'ghost' : 'soft'" @click="$emit('pin-post', post)"/>
-            </UTooltip>
+            <template #content>
+              <div class="flex flex-col gap-1 p-2 min-w-[160px]">
 
-            <UTooltip v-else-if="isPostPinned(post)" text="Wyróżniony post">
-              <UButton icon="i-lucide-badge-check" size="md" color="primary" variant="soft" />
-            </UTooltip>
+                <!-- Pin post -->
+                <UButton
+                  v-if="userStore.isAdminOrModerator"
+                  :icon="isPostPinned(post) ? 'i-lucide-badge-check' : 'i-lucide-badge-check'"
+                  :label="isPostPinned(post) ? 'Odznacz jako wyróżniony' : 'Wyróżnij post'"
+                  :color="isPostPinned(post) ? 'error' : 'neutral'"
+                  :variant="isPostPinned(post) ? 'ghost' : 'soft'"
+                  @click="$emit('pin-post', post)"
+                />
 
-            <UTooltip text="Odpowiedź na ten post">
-              <UButton icon="i-lucide-reply" size="md" color="info" variant="solid" />
-            </UTooltip>
+                <div
+                  v-else-if="isPostPinned(post)"
+                  class="flex items-center gap-2 text-sm text-primary"
+                >
+                  <UIcon name="i-lucide-badge-check" />
+                  <span>Wyróżniony post</span>
+                </div>
 
-            <UTooltip v-if="(post.user.id === userStore.id || userStore.isAdminOrModerator)" text="Edytuj post">
-              <UButton icon="i-lucide-pencil" size="md" :color="userStore.isAdminOrModerator ? 'primary': 'info'" variant="solid" @click="startEditing(post)"/>
-            </UTooltip>
+                <!-- Reply -->
+                <UButton
+                  icon="i-lucide-reply"
+                  label="Odpowiedz"
+                  color="info"
+                  variant="soft"
+                />
 
-            <UTooltip v-if="(post.user.id === userStore.id || userStore.isAdminOrModerator)" text="Usuń post" @click="startDeleting(post)">
-              <UButton icon="i-lucide-x" size="md" color="error" variant="solid" />
-            </UTooltip>
+                <!-- Edit -->
+                <UButton
+                  v-if="post.user.id === userStore.id || userStore.isAdminOrModerator"
+                  icon="i-lucide-pencil"
+                  label="Edytuj"
+                  :color="userStore.isAdminOrModerator ? 'primary' : 'info'"
+                  variant="soft"
+                  @click="startEditing(post)"
+                />
 
-            <UTooltip v-if="post.user.id !== userStore.id" text="Zgłoś ten post">
-              <UButton icon="i-lucide-message-circle-warning" size="md" color="error" variant="solid" />
-            </UTooltip>
-          </div>
+                <!-- Delete -->
+                <UButton
+                  v-if="post.user.id === userStore.id || userStore.isAdminOrModerator"
+                  icon="i-lucide-x"
+                  label="Usuń"
+                  color="error"
+                  variant="soft"
+                  @click="startDeleting(post)"
+                />
+
+                <!-- Report -->
+                <UButton
+                  v-if="post.user.id !== userStore.id"
+                  icon="i-lucide-message-circle-warning"
+                  label="Zgłoś"
+                  color="error"
+                  variant="soft"
+                />
+      
+              </div>
+            </template>
+          </UPopover>
 
           <reaction-segment v-if="post" :post="post" />
         </div>
@@ -86,23 +130,40 @@
         <UModal v-model:open="isDeleteModalOpen" title="Potwierdzenie usunięcia">
           <template #content>
             <div class="p-5">
-              <p class="text-justify">Czy na pewno chcesz usunąć ten post? Tego działania nie można cofnąć.</p>
+              <div
+                class="p-4 rounded-lg bg-slate-800  shadow-sm"
+              >
+                <div class="flex">
+                  <UserImgWithPopover :user="post.user" size="big" />
+
+                  <div class="w-full">
+                    <h3 class="font-semibold text-lg text-green-600">{{ post.user.username }}</h3>
+                    <p class="text-gray-200">{{ post.content }}</p>
+                  </div>
+                </div>
+              </div>
+                
+
+
+              <div class="p-5">
+                <p class="text-justify">Czy na pewno chcesz usunąć ten post? Tego działania nie można cofnąć.</p>
         
-              <div class="flex justify-end gap-2 mt-4">
-                <!-- Anulowanie -->
-                <UButton 
-                  label="Anuluj" 
-                  color="neutral" 
-                  variant="outline" 
-                  @click="isDeleteModalOpen = false"
-                />
+                <div class="flex justify-end gap-2 mt-4">
+                  <!-- Anulowanie -->
+                  <UButton 
+                    label="Anuluj" 
+                    color="neutral" 
+                    variant="outline" 
+                    @click="isDeleteModalOpen = false"
+                  />
           
-                <!-- Potwierdzenie usunięcia -->
-                <UButton 
-                  label="Usuń" 
-                  color="error" 
-                  @click="deletePost"
-                />
+                  <!-- Potwierdzenie usunięcia -->
+                  <UButton 
+                    label="Usuń" 
+                    color="error" 
+                    @click="deletePost"
+                  />
+                </div>
               </div>
             </div>
           </template>

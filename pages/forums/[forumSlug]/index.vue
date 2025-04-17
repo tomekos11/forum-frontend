@@ -10,30 +10,6 @@
       <div class="text-xl text-center">Forum odnośnie cyberbezpieczeństwa</div>
       <div class="text-xl text-gray-500 font-bold text-center">{{ forumName }}</div>
 
-      <div class="flex justify-between mt-10 mb-2">
-
-        <USelect
-          v-model="sortBy"
-          trailing-icon="i-lucide-arrow-down"
-
-          size="md"
-          :items="sortingOptions"
-          class="w-48"
-          @update:model-value="refresh()"
-        />
-
-        <UPagination v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0"/>
-
-        <UInput
-          v-model="filter"
-          placeholder="Filtruj po nazwie"
-          label="Bio"
-          @update:model-value="debouncedRefresh"
-        />
-                    
-        <add-topic-modal v-if="userStore.isLoggedIn && forumName" :forum-name="forumName" :forum-slug="$route.params.forumSlug.toString()"/>
-      </div>
-
       <div class="flex flex-col">
         <template v-for="(val, key) in response?.topics" :key="key">
           <NuxtLink 
@@ -42,12 +18,17 @@
             :to="`/forums/${route.params.forumSlug}/topics/${topic.slug}`"
             class="block"
           >
-            <UCard :class="`cursor-pointer hover:bg-green-700 transition ${key === 'primaryTopics' ? 'bg-slate-800 mb-2' : ''}`">
+            <UCard
+              :ui="{
+                header: 'p-2'
+              }"
+              :class="`cursor-pointer hover:bg-green-700 transition ${key === 'primaryTopics' ? 'bg-slate-800 mb-2' : ''}`"
+            >
               <template #header>
                 <div class="flex flex-wrap items-center justify-between w-full gap-4">
                   <!-- Lewa strona -->
                   <div class="flex items-center flex-1 sm:flex-row sm:items-center">
-                    <UAvatar src="https://github.com/benjamincanac.png" size="lg" class="mr-5"/>
+                    <UAvatar :text="topic.name[0].toUpperCase()" size="lg" :class="`mr-5 ${topic.isPrimary ? 'bg-slate-950' : ''}`"/>
                     <UIcon v-if="topic.isClosed" name="i-lucide-lock" size="xs" class="mr-2" />
                     <span class="text-sm sm:text-base whitespace-nowrap">{{ topic.name }}</span> <!-- Zapobiega zawijaniu -->
                   </div>
@@ -73,6 +54,32 @@
               </template>
             </UCard>
           </NuxtLink>
+
+          <div v-if="key === 'primaryTopics'" class="flex justify-between mt-10 mb-2 flex-wrap gap-0.5">
+            <div>
+              <USelect
+                v-model="sortBy"
+                trailing-icon="i-lucide-arrow-down"
+
+                size="md"
+                :items="sortingOptions"
+                class="w-48 mr-2"
+                @update:model-value="refresh()"
+              />
+
+              <UInput
+                v-model="filter"
+                placeholder="Filtruj po nazwie"
+                label="Bio"
+                @update:model-value="debouncedRefresh"
+              />
+            </div>
+            
+
+            <UPagination v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0"/>
+                    
+            <add-topic-modal v-if="userStore.isLoggedIn && forumName" :forum-name="forumName" :forum-slug="$route.params.forumSlug.toString()"/>
+          </div>
         </template>
 
         <UPagination v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2"/>
@@ -102,8 +109,9 @@ const route = useRoute();
 
 const sortingOptions = ref([
   [
-    { value: 'created_at_asc', label: 'Najnowsze', key: 'created_at', order: 'desc' },
-    { value: 'created_at_desc', label: 'Najstarsze', key: 'created_at', order: 'asc' }
+    { value: 'created_at_asc', label: 'Najnowszy temat', key: 'created_at', order: 'desc' },
+    { value: 'created_at_desc', label: 'Najstarszy temat', key: 'created_at', order: 'asc' },
+    { value: 'last_post_asc', label: 'Od najmłodszego posta', key: 'last_post', order: 'desc' },
   ],
   [
     { value: 'posts_count_asc', label: 'Największa ilość odpowiedzi', key: 'posts_count', order: 'desc'  },

@@ -1,113 +1,100 @@
 <template>
-  <nav class="mx-2 sm:mx-4 md:mx-6 lg:mx-10">
-    <UNavigationMenu
-      highlight
-      highlight-color="primary"
-      orientation="horizontal"
-      :items="items"
-      class="data-[orientation=horizontal]:border-b border-(--ui-border) data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48"
-    > 
-      <template #user>
-        <template v-if="userStore.isLoggedIn">
-          <UPopover v-model="isDropdownOpen" placement="bottom-end" @close="isDropdownOpen = false">
+  <nav class="px-4 py-2 border-b border-gray-200 flex justify-between items-center bg-slate-950">
+    <!-- Lewa strona - linki i wyszukiwarka -->
+    <div class="flex items-center gap-4">
+      <NuxtLink to="/" class="text-lg font-semibold hover:underline text-nowrap">Lista forów</NuxtLink>
 
-            <div @click="isDropdownOpen = true">
-              <UAvatar :src="userStore.data?.image || ''" />
+      <UPopover
+        v-model:open="isUsersListVisible"
+        :content="{
+          side: 'bottom',
+          align: 'start',
+        }"
+          
+        @close="isUsersListVisible = false"
+      >
+        <!-- To jest trigger popovera! -->
+        <div class="relative inline-block w-full">
+          <UInput
+            v-model="usernameToSearch"
+            placeholder="Użytkownik..."
+            @update:model-value="debouncedSearchUsers"
+          />
+        </div>
+          
 
-              {{ userStore.username }}
+        <template #content>
+          <div class="p-2 w-[196px]">
+            <template v-if="usersList.length">
+              <NuxtLink
+                v-for="user in usersList"
+                :key="user.id"
+                :to="`/profiles/${user.username}`"
+                class="user-link flex items-center p-2 rounded hover:bg-slate-800 transition-colors"
+              >
+                <UAvatar :src="user.data?.image || ''" size="xs"/>
+                <span class="ml-2 text-sm">{{ user.username }}</span>
+              </NuxtLink>
+            </template>
+            <div v-else class="text-sm">
+              Nie znaleziono użytkownika
             </div>
-
-            <template #content>
-              <div class="dropdown-menu">
-                <UButton 
-                  label="Profil" 
-                  color="neutral"
-                  class="hover:bg-gray-200"
-                  :to="`/profiles/${userStore.username}`"
-                />
-                <UButton 
-                  label="Ustawienia" 
-                  color="neutral"
-                  class="hover:bg-gray-200"
-                  @click="() => console.log(2)"
-                />
-                <UButton 
-                  label="Wyloguj się" 
-                  color="neutral"
-                  class="text-red-500 hover:bg-red-100" 
-                  @click="userStore.logout()"
-                />
-              </div>
-            </template>
-          </UPopover>
-        </template>
-
-        <template v-else>
-          <UModal v-model:open="showModal" title="Zaloguj się">
-            <UButton>Zaloguj się</UButton>
-            <template #content>
-              <login-modal-content @close-modal="showModal = false"/>
-            </template>
-          </UModal>
-        </template>
-      </template>
-
-
-      <template #users-search>
-        <UPopover
-          v-model:open="isUsersListVisible"
-          :content="{
-            side: 'bottom',
-            align: 'start',
-          }"
-          
-          @close="isUsersListVisible = false"
-        >
-          <!-- To jest trigger popovera! -->
-          <div class="relative inline-block w-full">
-            <UInput
-              v-model="usernameToSearch"
-              placeholder="Użytkownik..."
-              @update:model-value="debouncedSearchUsers"
-            />
           </div>
-          
+        </template>
+      </UPopover>
+    </div>
+
+    <!-- Prawa strona - notyfikacje + użytkownik -->
+    <div class="flex items-center gap-4">
+
+      <notification-button />
+
+      <template v-if="userStore.isLoggedIn">
+        <UPopover v-model="isDropdownOpen" placement="bottom-end" @close="isDropdownOpen = false">
+          <div class="flex items-center gap-2 cursor-pointer" @click="isDropdownOpen = true">
+            <UAvatar :src="userStore.data?.image || ''" />
+            <span>{{ userStore.username }}</span>
+          </div>
 
           <template #content>
-            <div class="p-2 w-[196px]">
-              <template v-if="usersList.length">
-                <NuxtLink
-                  v-for="user in usersList"
-                  :key="user.id"
-                  :to="`/profiles/${user.username}`"
-                  class="user-link flex items-center p-2 rounded hover:bg-slate-800 transition-colors"
-                >
-                  <UAvatar :src="user.data?.image || ''" size="xs"/>
-                  <span class="ml-2 text-sm">{{ user.username }}</span>
-                </NuxtLink>
-              </template>
-              <div v-else class="text-sm">
-                Nie znaleziono użytkownika
-              </div>
+            <div class="dropdown-menu">
+              <UButton 
+                label="Profil" 
+                color="neutral"
+                class="hover:bg-gray-200"
+                :to="`/profiles/${userStore.username}`"
+              />
+              <UButton 
+                label="Ustawienia" 
+                color="neutral"
+                class="hover:bg-gray-200"
+                @click="() => console.log(2)"
+              />
+              <UButton 
+                label="Wyloguj się" 
+                color="neutral"
+                class="text-red-500 hover:bg-red-100" 
+                @click="userStore.logout()"
+              />
             </div>
           </template>
         </UPopover>
       </template>
 
-      <!-- <template #notifications>
-        <UChip inset color="error">
-          <UButton icon="i-lucide-bell" variant="ghost" color="neutral"/>
-        </UChip>
-      </template> -->
-      
-    </UNavigationMenu >
+      <template v-else>
+        <UModal v-model:open="showModal" title="Zaloguj się">
+          <UButton>Zaloguj</UButton>
+          <template #content>
+            <login-modal-content @close-modal="showModal = false"/>
+          </template>
+        </UModal>
+      </template>
+    </div>
   </nav>
 </template>
 
 <script setup lang="ts">
-import type { NavigationMenuItem } from '@nuxt/ui';
 import { useDebounceFn, useEventBus } from '@vueuse/core';
-import { useForumsStore } from '~/stores/forum';
 import { useUserStore } from '~/stores/user';
 import type { User } from '~/types/types';
 
@@ -116,29 +103,6 @@ const isUsersListVisible = ref(false);
 const showModal = ref(false);
 
 const userStore = useUserStore();
-const forumsStore = useForumsStore();
-
-const items = computed<NavigationMenuItem[][]>(() => ([
-  [
-    {
-      label: 'Lista forów',
-      icon: 'i-lucide-book-open',
-      children: forumsStore.navigationForums
-    },
-    {
-      slot: 'users-search'
-    }
-  ],
-  
-  [
-    {
-      slot: 'notifications',
-    },
-    {
-      slot: 'user'
-    },
-  ]
-]));
 
 const usernameToSearch = ref('');
 
@@ -152,12 +116,6 @@ const unsubscribe = userBus.on(showLoginModal);
 
 onBeforeUnmount(() => {
   unsubscribe();
-});
-
-watch(() => userStore.isLoggedIn, (nv) => {
-  console.log(nv);
-}, {
-  immediate: true
 });
 
 const debouncedSearchUsers = useDebounceFn(() => findUsers(), 700);
