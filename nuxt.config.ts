@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
@@ -8,7 +9,8 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@nuxt/icon',
     '@nuxt/image',
-    '@nuxt/ui'
+    '@nuxt/ui',
+    'nuxt-security',
   ],
 
   plugins: [
@@ -20,6 +22,21 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
+
+  security: {
+    headers: {
+      contentSecurityPolicy: {
+        'default-src': ['\'self\''],
+        'connect-src': ['\'self\'', import.meta.env.NUXT_PUBLIC_API_URL],
+        'script-src': ['\'self\'', 'https:', '\'unsafe-inline\''],
+        'style-src': ['\'self\'', 'https:', '\'unsafe-inline\''],
+        'img-src': ['\'self\'', 'data:', 'https:'],
+        'font-src': ['\'self\'', 'https:', 'data:'],
+        'object-src': ['\'none\''],
+        'upgrade-insecure-requests': true,
+      },
+    },
+  },
 
   runtimeConfig: {
     public: {

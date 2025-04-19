@@ -19,4 +19,19 @@ const router = useRouter();
 const goHome = () => {
   router.push('/');
 };
+
+const checkIfApiIsUp = async () => {
+  try {
+    const isUp = await useFetchWithAuth('/is-api-online');
+
+    if(isUp) {
+      router.replace('/');
+    }
+
+  } catch (err) {
+    setTimeout(checkIfApiIsUp, 5000);
+  }
+};
+
+await checkIfApiIsUp();
 </script>

@@ -12,7 +12,7 @@
 
       <div class="flex flex-col mt-10">
         <NuxtLink 
-          v-for="forum in useForumsStore().forums" 
+          v-for="forum in forums" 
           :key="forum.slug" 
           :to="`/forums/${forum.slug}`"
           class="block"
@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import type { BreadcrumbItem } from '@nuxt/ui';
 import { formatDate } from '~/helpers/date';
-import { useForumsStore } from '~/stores/forum';
+import type { Forum } from '~/types/types';
 
 const items: BreadcrumbItem[] = [
   {
@@ -69,4 +69,14 @@ const items: BreadcrumbItem[] = [
     icon: 'i-heroicons-home'
   },
 ];
+
+const { data: forums } = useAsyncData(async () => {
+  try {
+    const res = await useFetchWithAuth<Forum[]>('/forums');
+    return res;
+  } catch (err) {
+    return null; 
+  }
+      
+});
 </script>
