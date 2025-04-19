@@ -24,14 +24,15 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   security: {
+    nonce: true,
     headers: {
       contentSecurityPolicy: {
         'default-src': ['\'self\''],
         'connect-src': ['\'self\'', import.meta.env.NUXT_PUBLIC_API_URL],
-        'script-src': ['\'self\'', 'https:', '\'unsafe-inline\''],
+        'script-src': ['\'self\'', '\'nonce-{{nonce}}\'', '\'strict-dynamic\''],
         'style-src': ['\'self\'', 'https:', '\'unsafe-inline\''],
-        'img-src': ['\'self\'', 'data:', 'https:'],
-        'font-src': ['\'self\'', 'https:', 'data:'],
+        'img-src': ['\'self\'', 'data:', 'https://i.pravatar.cc', import.meta.env.NUXT_PUBLIC_API_URL],
+        'font-src': ['\'self\''],
         'object-src': ['\'none\''],
         'upgrade-insecure-requests': true,
       },

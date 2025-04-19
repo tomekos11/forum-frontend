@@ -45,7 +45,7 @@
   </UAccordion>
 
   <div v-if="!user?.followedTopics?.length" class="text-sm mt-4">
-    Brak obserwowanych tematów
+    <UIcon name="i-lucide-x" class="text-red-500"/> Brak obserwowanych tematów
   </div>
 </template>
 
@@ -83,11 +83,4 @@ const unfollow = async (topic: Topic) => {
 
 };
 
-// const active = ref('0');
-
-// onMounted(() => {
-//   setInterval(() => {
-//     active.value = String((Number(active.value) + 1) % (user.value?.followedTopics?.length || 1));
-//   }, 2000);
-// });
 </script>
