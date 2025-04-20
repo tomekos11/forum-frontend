@@ -33,9 +33,26 @@
 
                 <!-- Prawa strona (Counter + "odpowiedzi") -->
                 <div class="flex gap-3 sm:gap-5 items-center justify-end">
-                  <div class="text-right">
-                    <span class="font-bold text-lg">{{ forum.postCounter || 0 }}</span> <!-- Counter -->
-                    <div class="text-sm text-gray-400">odpowiedzi</div> <!-- Tekst "odpowiedzi" -->
+                  <div class="text-right gap-2 flex">
+                    <UBadge
+                      size="md"
+                      color="neutral"
+                      variant="outline"
+                    >
+                      Tematów {{ forum.topicsCount || 0 }}
+                    </UBadge>
+          
+                    <UBadge
+                      icon="i-lucide-notebook-pen"
+                      size="md"
+                      color="neutral"
+                      variant="outline"
+                    >
+                      Postów {{ forum.postCounter || 0 }}
+                    </UBadge>
+
+                    <!-- <span class="font-bold text-lg">{{ forum.postCounter || 0 }}</span>
+                    <div class="text-sm text-gray-400">odpowiedzi</div> -->
                   </div>
                   <div class="w-[160px] truncate">
                     <template v-if="forum.latestPost">

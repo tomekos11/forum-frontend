@@ -126,52 +126,51 @@
 
           <reaction-segment v-if="post" :post="post" />
         </div>
+      </div>
+    </div>
+  </div>
 
-        <UModal v-model:open="isDeleteModalOpen" title="Potwierdzenie usunięcia">
-          <template #content>
-            <div class="p-5">
-              <div
-                class="p-4 rounded-lg bg-slate-800  shadow-sm"
-              >
-                <div class="flex">
-                  <UserImgWithPopover :user="post.user" size="big" />
+  <UModal v-model:open="isDeleteModalOpen" title="Potwierdzenie usunięcia">
+    <template v-if="deletingPost" #content>
+      <div class="p-5">
+        <div
+          class="p-4 rounded-lg bg-slate-800  shadow-sm"
+        >
+          <div class="flex">
+            <UserImgWithPopover :user="deletingPost.user" size="big" />
 
-                  <div class="w-full">
-                    <h3 class="font-semibold text-lg text-green-600">{{ post.user.username }}</h3>
-                    <p class="text-gray-200">{{ post.content }}</p>
-                  </div>
-                </div>
-              </div>
+            <div class="w-full">
+              <h3 class="font-semibold text-lg text-green-600">{{ deletingPost.user.username }}</h3>
+              <p class="text-gray-200">{{ deletingPost.content }}</p>
+            </div>
+          </div>
+        </div>
                 
 
 
-              <div class="p-5">
-                <p class="text-justify">Czy na pewno chcesz usunąć ten post? Tego działania nie można cofnąć.</p>
+        <div class="p-5">
+          <p class="text-justify">Czy na pewno chcesz usunąć ten post? Tego działania nie można cofnąć.</p>
         
-                <div class="flex justify-end gap-2 mt-4">
-                  <!-- Anulowanie -->
-                  <UButton 
-                    label="Anuluj" 
-                    color="neutral" 
-                    variant="outline" 
-                    @click="isDeleteModalOpen = false"
-                  />
+          <div class="flex justify-end gap-2 mt-4">
+            <!-- Anulowanie -->
+            <UButton 
+              label="Anuluj" 
+              color="neutral" 
+              variant="outline" 
+              @click="isDeleteModalOpen = false"
+            />
           
-                  <!-- Potwierdzenie usunięcia -->
-                  <UButton 
-                    label="Usuń" 
-                    color="error" 
-                    @click="deletePost"
-                  />
-                </div>
-              </div>
-            </div>
-          </template>
-        </UModal>
+            <!-- Potwierdzenie usunięcia -->
+            <UButton 
+              label="Usuń" 
+              color="error" 
+              @click="deletePost"
+            />
+          </div>
+        </div>
       </div>
-
-    </div>
-  </div>
+    </template>
+  </UModal>
 </template>
 
 <script setup lang="ts">
@@ -207,7 +206,7 @@ const userStore = useUserStore();
 const toast = useToast();
 
 const editing = ref<Editing | null>(null);
-const deleting = ref<number | null>(null);
+const deletingPost = ref<Post | null>(null);
 
 const isDeleteModalOpen = ref(false);
 
@@ -260,30 +259,30 @@ const saveContent = async () => {
 };
 
 const startDeleting = (post: Post) => {
-  deleting.value = post.id; 
+  deletingPost.value = post; 
   isDeleteModalOpen.value = true;
 };
 
 const deletePost = async () => {
-  if(!deleting.value) return;
+  if(!deletingPost.value) return;
 
   try {
 
     await useFetchWithAuth('/posts', {
       body: {
-        postId: deleting.value
+        postId: deletingPost.value.id
       },
       method: 'delete',
     });
 
-    const found = posts.value.find(post => post.id === deleting.value);
+    const found = posts.value.find(post => post.id === deletingPost.value?.id);
 
     if(found) {
       found.content = '[Post został usunięty]';
       found.isDeleted = true;
     }
 
-    deleting.value = null;
+    deletingPost.value = null;
 
     toast.add({
       title: 'Poprawnie usunięto post',

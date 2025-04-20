@@ -93,6 +93,7 @@ export interface Forum {
     updatedAt: string;
     topics: Topic[]
     latestPost: Post;
+    topicsCount?: number;
     postCounter?: number;
 }
 

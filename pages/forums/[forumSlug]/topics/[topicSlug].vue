@@ -32,11 +32,11 @@
 
       <div>
 
-        <UTooltip text="Post jest zamknięty" >
+        <UTooltip text="Temat jest zamknięty" >
           <UIcon v-if="response?.topic.isClosed" name="i-lucide-lock" size="xs" class="mr-5" />
         </UTooltip>
 
-        <UTooltip text="Obserwujesz ten post">
+        <UTooltip text="Obserwujesz ten temat">
           <UIcon v-if="response?.topic.isFollowed" name="i-lucide-eye" size="xs" class="mr-5" />
         </UTooltip>
 
@@ -49,8 +49,10 @@
 
           <template #item>
             <div class="flex flex-col gap-1">
-              <UButton v-if="!response?.topic.isClosed" label="Zamknij temat" variant="ghost" color="neutral" icon="i-lucide-lock" @click="closeTopic" />
-              <UButton v-else label="Otwórz temat" variant="ghost" color="neutral" icon="i-lucide-key" @click="openTopic" />
+              <template v-if="userStore.isAdminOrModerator">
+                <UButton v-if="!response?.topic.isClosed" label="Zamknij temat" variant="ghost" color="neutral" icon="i-lucide-lock" @click="closeTopic" />
+                <UButton v-else label="Otwórz temat" variant="ghost" color="neutral" icon="i-lucide-key" @click="openTopic" />
+              </template>
 
               <UButton v-if="!response?.topic.isFollowed" label="Obserwuj temat" variant="ghost" color="neutral" icon="i-lucide-eye" @click="followTopic(true)" />
               <UButton v-else label="Przestań obserwować temat" variant="ghost" color="neutral" icon="i-lucide-eye-off" @click="followTopic(false)" />
@@ -75,7 +77,7 @@
     >
       <template v-if="response?.topic.isClosed">
         <UIcon name="i-lucide-lock" size="xs" />
-        Post jest zamknięty. Nie można udzielić odpowiedzi
+        Temat jest zamknięty. Nie można udzielić odpowiedzi
       </template>
       <template v-else-if="useUserStore().isLoggedIn">
         <UTextarea v-model="content" autoresize class="block"/>
@@ -108,6 +110,7 @@ const route = useRoute();
 const router = useRouter();
 const toast = useToast();
 const userBus = useEventBus<string>('user');
+const userStore = useUserStore();
 
 const sortingOptions = ref([
   [
