@@ -4,7 +4,7 @@
       icon="i-lucide-plus"
       :color="reactionType === 'like' ? 'primary' :'neutral'"
       :variant="reactionType === 'like' ? 'soft' :'outline'"
-      class="cursor-pointer"
+      :class="!isLoggedUserAuthorOfPost ? 'cursor-pointer' : ''"
       :ui="{
         leadingIcon: 'text-(--ui-primary)'
       }"
@@ -18,7 +18,7 @@
       icon="i-lucide-minus"
       :color="reactionType === 'dislike' ? 'error' :'neutral'"
       :variant="reactionType === 'dislike' ? 'soft' :'outline'"
-      class="cursor-pointer"
+      :class="!isLoggedUserAuthorOfPost ? 'cursor-pointer' : ''"
       :ui="{
         leadingIcon: 'text-(--ui-error)'
       }"
@@ -54,8 +54,10 @@ const userStore = useUserStore();
 const toast = useToast();
 const isLoading = ref(false);
 
+const isLoggedUserAuthorOfPost = computed(() => _post.value.user.id === userStore.id);
+
 const changeReaction = (newReaction: Reaction) => {
-  if(userStore.isLoggedIn) {
+  if(userStore.isLoggedIn && !isLoggedUserAuthorOfPost.value) {
     if(reactionType.value === newReaction) {
       reactionType.value = null;
     } else {
@@ -63,7 +65,14 @@ const changeReaction = (newReaction: Reaction) => {
     }
     addReactionDebounced();
     isLoading.value = true;
-  } else {
+  } 
+  else if(isLoggedUserAuthorOfPost.value) {
+    toast.add({
+      title: 'To twój post',
+      description: 'Nie możesz zareagować na własny post',
+    });
+  }
+  else {
     toast.add({
       title: 'Nie jesteś zalogowany',
       description: 'Aby dodawac reakcje, stwórz konto',

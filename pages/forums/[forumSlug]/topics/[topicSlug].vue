@@ -65,7 +65,9 @@
 
     <pinned-post v-if="response?.topic && response.topic.pinnedPost" :post="response.topic.pinnedPost" class="mb-2" @unpin="pinPost"/>
 
-    <paginated-posts v-if="posts" :posts="posts" :pinned-post="response?.topic.pinnedPost || null" class="mt-5" @pin-post="pinPost" />
+    <post-loading v-if="postLoadingStatus === 'pending'" />
+    <paginated-posts v-else-if="posts && posts.length" :posts="posts" :pinned-post="response?.topic.pinnedPost || null" class="mt-5" @pin-post="pinPost" />
+
 
     <UPagination  v-if="posts && posts.length" v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2" style="padding-bottom: 200px;"/>
 
@@ -158,7 +160,7 @@ const { data: topicName } = useFetch<string>(`${config.public.API_URL}/topics/na
   }
 });
 
-const { data: response, refresh } = useAsyncData(
+const { data: response, refresh, status: postLoadingStatus } = useAsyncData(
   `topic-${route.params.topicSlug}-${useUserStore().username}-${route.query.page || 1}-${sortBy.value}`,
   async () => {
 
