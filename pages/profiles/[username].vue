@@ -1,7 +1,7 @@
 <template>
   <UContainer class="py-10 flex sm:flex-row flex-col gap-6">
     
-    <UCard class="text-center bg-slate-950" style="width:min(500px,100%); min-width: 20%">
+    <UCard class="flex-sm-2 flex-md-3 text-center bg-slate-950 w-full sm:w-[min(500px,100%)]">
       <div v-if="data?.user" class="flex flex-col items-center space-y-4">
         <div class="relative inline-block w-fit">
           <img
@@ -52,7 +52,7 @@
       </template>
     </UCard>
 
-    <div class="flex grow flex-col gap-5">
+    <div class="flex flex-col gap-5 flex-9 min-w-[300px]">
       <UCard class="grow bg-slate-950">
         <div class="flex justify-between">
           <span>

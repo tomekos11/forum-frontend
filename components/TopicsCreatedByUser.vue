@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col justify-between h-full">
     <UAccordion
-      v-if="topics"
+      v-if="topics?.length"
       :ui="{
         body: 'px-3',
         header: 'hover:bg-green-800 px-3 transition'
@@ -43,7 +43,7 @@
       </template>
     </UAccordion>
   
-    <div v-if="topics" class="mb-6 flex justify-center">
+    <div v-if="topics?.length" class="mb-6 flex justify-center">
       <UButton
         icon="i-lucide-list"
         color="primary"
@@ -52,10 +52,10 @@
         Wszystkie tematy użytkownika
       </UButton>
     </div>
-  </div>
 
-  <div v-if="!topics?.length" class="text-sm mt-4">
-    <UIcon name="i-lucide-x" class="text-red-500"/> Użytkownik nie stworzył żadnego tematu
+    <div v-if="!topics?.length" class="text-sm mt-4">
+      <UIcon name="i-lucide-x" class="text-red-500"/> Użytkownik nie stworzył żadnego tematu
+    </div>
   </div>
 </template>
 

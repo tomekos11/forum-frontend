@@ -36,6 +36,17 @@ export interface User {
     updatedAt: string | null;
   }
 
+export interface PostHistory {
+    content: string;
+    deletedBy: null | string;
+    id: number;
+    postId: number;
+    userId: number;
+    user: User;
+    createdAt: string | null;
+    updatedAt: string | null;
+}
+
 export interface Post {
     id: number;
     userId: number;
@@ -48,6 +59,7 @@ export interface Post {
         dislike: number;
         like: number;
     }
+    postHistories?: PostHistory[],
     notification: boolean;
     myReaction?: Reaction;
     topic?: Topic;

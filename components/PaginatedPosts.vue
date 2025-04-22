@@ -55,7 +55,11 @@
             </div>
           </div>
 
-          <small class="text-gray-500">{{ formatDate(post.createdAt) }}</small>
+          <template v-if="post.postHistories?.length">
+            <div v-if="post.postHistories[0]?.userId === post.userId" class="text-sm text-gray-500">Edytowany: {{ formatDate(post.postHistories[0]?.createdAt) }}</div>
+            <div v-else class="text-sm text-red-500">Edytowany: {{ formatDate(post.postHistories[0]?.createdAt)}} przez {{ post.postHistories[0]?.user.username }}</div>
+          </template>
+          <div class="text-sm text-gray-500 mt-4">Stworzony: {{ formatDate(post.createdAt) }}</div>
         </div>
 
         <div v-if="!post.isDeleted" class="ml-auto flex gap-2 flex-col justify-between items-end">

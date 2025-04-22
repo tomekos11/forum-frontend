@@ -16,8 +16,13 @@
     </template>
 
     <template #body="{ item: topic }">
-      <p class="text-sm text-gray-500">
+      <!-- <p class="text-sm text-gray-500">
         Tutaj potencjalny opis tematu <strong>{{ topic.name }}</strong> 
+      </p> -->
+
+      <p class="text-sm text-gray-500 line-clamp-3">
+        <!-- {{ topic.posts?.[0]?.content }} -->
+        {{ topic.posts?.[0]?.content || 'Brak postów 💥'}}
       </p>
 
       <UButton
