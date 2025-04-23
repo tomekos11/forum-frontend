@@ -26,12 +26,28 @@ export interface UserData {
     updatedAt: string | null;
 }
 
+export interface BanInfo {
+    isBanned: boolean;
+    unlockDate: string | null;
+}
+
+export interface Ban {
+    bannedBy: number;
+    bannedUntil: string;
+    createdAt: string | null;
+    updatedAt: string | null;
+    id: number;
+    userId: number;
+    reason: string;
+}
+
 export interface User {
     id: number | null;
     username: string | null;
     role: 'user' | 'marketing' | 'moderator' | 'admin' | null;
     data?: UserData | null;
     followedTopics?: Topic[] | null;
+    banInfo?: BanInfo;
     createdAt: string | null;
     updatedAt: string | null;
   }

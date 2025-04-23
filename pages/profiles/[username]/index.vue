@@ -25,6 +25,9 @@
 
           <p class="text-gray-400 text-sm mt-4">{{ data.user.data?.description }}</p>
 
+          <p v-if="data.user.banInfo?.isBanned" class="text-red-800 text-sm mt-4">
+            <UIcon name="i-lucide-lock" /> {{ data.user.banInfo?.unlockDate ? 'Konto zablokowane czasowo' : 'Konto zablokowane pernamentnie' }}
+          </p>
         </div>
 
         <UCard class="max-w-md mx-auto text-center mt-5 w-full ">
@@ -46,10 +49,14 @@
           </div>
         </UCard>
 
-        <p class="text-sm text-gray-500">Konto założone {{ DateTime.fromISO(data.user?.createdAt).toRelative() }}</p>
+        <p v-if="data.user?.createdAt" class="text-sm text-gray-500">Konto założone {{ DateTime.fromISO(data.user?.createdAt).toRelative() }}</p>
 
         <ChangeUserDataModal v-if="canEdit" v-model:user="data.user" />
-        <profile-ban-user-modal v-if="userStore.role === 'admin' && userStore.id !== data.user.id" v-model:user="data.user" />
+
+        <template v-if="userStore.role === 'admin' && userStore.id !== data.user.id">
+          <profile-ban-user-modal v-if="!data.user.banInfo?.isBanned" v-model:user="data.user" />
+          <profile-unban-user-modal v-else v-model:user="data.user" />
+        </template>
       </div>
 
       <template v-else>

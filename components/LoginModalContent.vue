@@ -16,6 +16,11 @@
         </div>
 
         <UButton type="submit" label="Zaloguj się" class="w-full bg-green-500 text-white hover:bg-green-600" />
+
+        <div v-if="error" class="text-red-800">
+          Konto {{ error.username }} zostało zbanowane dnia {{ formatDate(error.createdAt || '') }} z powodu: {{ error.reason }}. Blokada potrwa do dnia {{ formatDate(error.bannedUntil) }}
+        </div>
+
         <p class="text-center text-sm mt-4">
           Jeszcze nie masz konta? 
           <span class="text-green-600 cursor-pointer hover:underline" @click="toggleRegister">Załóż je</span>
@@ -54,14 +59,21 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { useUserStore } from '~/stores/user';
-import type { Notification, User } from '~/types/types';
+import type { Ban, Notification, User } from '~/types/types';
 import { useFetchWithAuth } from '../composables/useFetchWithAuth';
+import { formatDate } from '~/helpers/date';
+
+interface Error extends Ban {
+  username: string;
+}
 
 const emit = defineEmits(['close-modal']);
 const userStore = useUserStore();
 
 const isRegister = ref(false); // Kontroluje przełączanie między logowaniem a rejestracją
 const toast = useToast();
+
+const error = ref<Error | null>(null);
 
 const form = reactive({
   username: '',
@@ -106,10 +118,23 @@ const login = async () => {
   } catch (err) {
     const errorMessage = err.response?._data?.error || err.message || 'Nieznany błąd';
 
-    toast.add({
-      title: 'Ups wystąpił problem',
-      description: errorMessage
-    });
+    if(err.response._data?.isBanned) {
+      error.value = {
+        username: form.username,
+        ...err.response._data
+      };
+
+      toast.add({
+        title: 'Konto jest zablokowane'
+      });
+    } else {
+      toast.add({
+        title: 'Ups wystąpił problem',
+        description: errorMessage
+      });
+    }
+
+    
   }
 };
 

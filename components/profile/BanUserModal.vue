@@ -12,7 +12,7 @@
           <h2 class="text-xl font-semibold">Banowanie użytkownika</h2>
         </template>
         
-        <form @submit="onSubmit">
+        <form @submit.prevent="onSubmit">
           <UFormField label="Powód blokady" required>
             <UInput
               v-model="reason"
@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import type { User } from '~/types/types';
+import type { Ban, User } from '~/types/types';
 
 const showModal = ref(false);
 
@@ -69,8 +69,8 @@ const dateType = ref<'d' | 'm' | 'y'>('d');
 
 const reason = ref('');
 
-const onSubmit = () => {
-  useFetchWithAuth('/bans', {
+const onSubmit = async () => {
+  const { ban } = await useFetchWithAuth<{ban: Ban}>('/bans', {
     method: 'post',
     body: {
       userId: user.value.id,
@@ -78,5 +78,12 @@ const onSubmit = () => {
       reason: reason.value
     }
   });
+
+  console.log(ban);
+
+  user.value.banInfo = {
+    isBanned: true,
+    unlockDate: ban.bannedUntil
+  };
 };
 </script>
