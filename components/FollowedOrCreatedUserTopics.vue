@@ -58,6 +58,7 @@
                   <UButton
                     label="Przejdź do tematu"
                     variant="ghost"
+                    :to="`/forums/${topic.forum?.slug}/topics/${topic.slug}`"
                   />
 
                   <UButton v-if="type === 'followed' && canEdit" label="Przestań obserwować temat" variant="ghost" color="error" icon="i-lucide-eye-off" @click="unfollowTopic(topic)" />
@@ -132,7 +133,7 @@ const unfollowTopic = async (topic: Topic) => {
 
     const topicIndex = data.value?.user.followedTopics?.findIndex(top => top.id === topicFromApi.id);
 
-    if(topicIndex && topicIndex !== -1) {
+    if(topicIndex !== undefined && topicIndex !== -1) {
       data.value?.user.followedTopics?.splice(topicIndex, 1);
     }
     

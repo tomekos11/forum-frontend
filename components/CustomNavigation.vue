@@ -32,8 +32,11 @@
                 :to="`/profiles/${user.username}`"
                 class="user-link flex items-center p-2 rounded hover:bg-slate-800 transition-colors"
               >
-                {{ user.username?.[0] }}
-                <UAvatar :src="user.data?.image || ''" :alt="user?.username || 'Avatar'" size="xs"/>
+                <UAvatar
+                  :src="user.data?.image || ''"
+                  :alt="user?.username || 'Avatar'"
+                  size="xs"
+                />
                 <span class="ml-2 text-sm">{{ user.username }}</span>
               </NuxtLink>
             </template>

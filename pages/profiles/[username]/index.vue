@@ -49,6 +49,7 @@
         <p class="text-sm text-gray-500">Konto założone {{ DateTime.fromISO(data.user?.createdAt).toRelative() }}</p>
 
         <ChangeUserDataModal v-if="canEdit" v-model:user="data.user" />
+        <profile-ban-user-modal v-if="userStore.role === 'admin' && userStore.id !== data.user.id" v-model:user="data.user" />
       </div>
 
       <template v-else>

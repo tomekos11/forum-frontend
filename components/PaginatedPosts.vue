@@ -234,7 +234,7 @@ const saveContent = async () => {
   if(!editing.value) return;
 
   try {
-    await useFetchWithAuth('/posts', {
+    const { message, post } = await useFetchWithAuth<{message: string; post:Post}>('/posts', {
       body: {
         postId: editing.value.postId,
         content: editing.value.content
@@ -242,16 +242,18 @@ const saveContent = async () => {
       method: 'patch',
     });
 
-    const found = posts.value.find(post => post.id === editing.value?.postId);
+    const foundIndex = posts.value.findIndex(post => post.id === editing.value?.postId);
 
-    if(found) {
-      found.content = editing.value.content;
+    if(foundIndex !== -1) {
+      posts.value[foundIndex].content = post.content;
+      posts.value[foundIndex].postHistories = post.postHistories;
     }
 
     editing.value = null;
 
     toast.add({
-      title: 'Poprawnie edytowano post',
+      title: 'Edycja posta',
+      description: message
     });
   } catch (err) {
     const errorMessage = err.response?._data?.error || err.message || 'Nieznany błąd';

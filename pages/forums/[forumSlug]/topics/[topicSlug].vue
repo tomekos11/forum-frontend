@@ -180,15 +180,18 @@ watch(page, async () => {
       page: String(page.value),
     },
   });
+
 });
 
 
-watch(() => route.query.page, async (nv) => {
-  if(nv) {
-    page.value = Number(nv);
+watch(() => route.query.page, async (newVal, oldVal) => {
+  if(newVal) {
+    page.value = Number(newVal);
   }
   
-  refresh();
+  if(oldVal) {
+    refresh();
+  }
 });
 
 const posts = ref<Post[]>(response.value?.data || []);
@@ -270,10 +273,4 @@ const followTopic = async (follow: boolean) => {
     console.error(err);
   }
 };
-
-watch(posts, (nv) => {
-  console.log(nv);
-}, {
-  deep: true
-});
 </script>

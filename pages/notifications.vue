@@ -12,19 +12,10 @@
     />
 
     <template v-for="(val, key) in response" :key="key">
-      <!-- <h1 class="text-lg text-center mt-10 mb-2">
-        <template v-if="key === 'unread' && val.length">
-          Tematy z nowymi, nieodczytanymi postami
-        </template>
-
-        <template v-else-if="key === 'read' && val.length">
-          Tematy z odczytanymi wszystkimi powiadomieniami
-        </template>
-      </h1> -->
       <NuxtLink 
         v-for="notif in response?.[key]" 
         :key="notif.topic.id" 
-        :to="`/forums/${notif.topic.forum?.slug}/topics/${notif.topic.slug}`"
+        :to="`/forums/${notif.topic.forum?.slug}/topics/${notif.topic.slug}?page=${notif.page}`"
         class="block"
       >
         <UCard
@@ -47,44 +38,31 @@
               </div>
 
               <!-- Prawa strona (Counter + "odpowiedzi") -->
-              <div class="flex gap-3 sm:gap-5 items-center justify-end">
-                <!-- <div class="text-center">
-                  <span class="font-bold text-lg">{{ notif.topic.postCounter || 0 }}</span>
-                  <div class="text-sm text-gray-400">Odpowiedzi</div>
-                </div>
-
-                <div v-if="notif.unreadCount" class="text-center">
-                  <span class="font-bold text-lg">{{ notif.unreadCount }}</span>
-                  <div class="text-sm text-gray-400">Nieprzeczytane</div>
-                </div> -->
-                <div class="flex gap-2 items-center justify-between">
-                  <!-- <UBadge icon="i-lucide-mail" :label="notif.topic.postCounter || 0" color="neutral" class="mr-1" /> -->
+              <div class="flex gap-3 sm:gap-5 items-center flex-wrap justify-center">
+                <div class="flex gap-2 items-center justify-evenly">
                   <UTooltip v-if="notif.unreadCount">
                     <UBadge icon="i-lucide-mail-warning" color="error" :label="notif.unreadCount" />
                     <template #content>
                       <div>
                         Nieprzeczytanych wiadomości: <strong>{{ notif.unreadCount }}</strong>
                       </div>
-                      <div v-if="notif.lastReadAt">
-                        Ostatnio odczytane powiadomienie: {{ formatDate(notif.lastReadAt) }}
-                      </div>
                     </template>
                   </UTooltip>
 
-                  <div class="text-center">
-                    <div class="text-sm text-gray-400">Ostatnia aktualizacja</div>
-                    <span class="text-sm">{{ formatDate(notif.lastPostAt) }}</span>
+                  <div v-if="notif.lastReadAt" class="text-center">
+                    <div class="text-sm text-gray-400">Odczytano dnia</div>
+                    <span class="text-sm">{{ formatDate(notif.lastReadAt) }}</span>
                   </div>
                   
                 </div>
 
                 <div class="w-[160px] truncate">
-                  <template v-if="notif.topic?.posts && notif.topic.posts[0]">
-                    <user-img-with-popover :user="notif.topic.posts[0].user || null" />
+                  <template v-if="notif.lastPost">
+                    <user-img-with-popover :user="notif.lastPost.user || null" />
 
-                    <span class="text-sm">{{ notif.topic.posts[0].user.username }}</span>
+                    <span class="text-sm">{{ notif.lastPost.user.username }}</span>
                     <div class="text-sm text-center">
-                      <span class="text-gray-400">{{ formatDate(notif.topic.createdAt) }}</span>
+                      <span class="text-gray-400">{{ formatDate(notif.lastPost.createdAt) }}</span>
                     </div>
                   </template>
                 </div>
@@ -100,13 +78,15 @@
 <script setup lang="ts">
 import { formatDate } from '~/helpers/date';
 import { useUserStore } from '~/stores/user';
-import type { Topic } from '~/types/types';
+import type { Post, Topic } from '~/types/types';
 
 interface Notif {
   lastPostAt: string;
   lastReadAt: string;
   topic: Topic;
   unreadCount?: number;
+  lastPost: Post;
+  page: number;
 }
 
 interface Response {
