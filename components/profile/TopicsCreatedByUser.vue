@@ -47,7 +47,7 @@
       <UButton
         icon="i-lucide-list"
         color="primary"
-        :to="`/forums/`"
+        :to="`/profiles/${user.username}/created-topics`"
       >
         Wszystkie tematy użytkownika
       </UButton>
@@ -60,8 +60,14 @@
 </template>
 
 <script setup lang="ts">
-import type { Topic } from '~/types/types';
+import type { Topic, User } from '~/types/types';
+
+interface Props {
+  user: User
+}
 
 const topics = defineModel<Topic[]>('topics');
+
+defineProps<Props>();
 
 </script>

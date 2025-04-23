@@ -129,7 +129,7 @@ const register = async () => {
     });
 
     
-    useUserStore().setUser(newUser);
+    useUserStore().setUser(newUser, []);
 
     toast.add({
       title: 'Poprawnie zarejestrowano',

@@ -1,14 +1,20 @@
 <template>
-  <UContainer class="py-10 flex sm:flex-row flex-col gap-6">
+  <UContainer class="min-h-[90svh] py-10 flex sm:flex-row flex-col gap-6">
     
     <UCard class="flex-sm-2 flex-md-3 text-center bg-slate-950 w-full sm:w-[min(500px,100%)]">
       <div v-if="data?.user" class="flex flex-col items-center space-y-4">
         <div class="relative inline-block w-fit">
-          <img
+          <!-- <img
             :src="data.user.data?.image || ''"
             alt="Avatar"
             class="rounded-full w-32 h-32 object-cover"
-          >
+          > -->
+          
+          <UAvatar
+            :src="data.user.data?.image || ''"
+            :alt="data.user.username || 'Avatar'"
+            class="w-32 h-32 rounded-full object-cover"
+          />
 
           <ChangeUserPhoto v-if="canEdit" v-model:user="data.user" />
         </div>
@@ -60,7 +66,7 @@
           </span>
           <UIcon name="i-lucide-eye" />
         </div> 
-        <FollowedTopics v-if="data?.user" v-model:user="data.user" />
+        <profile-followed-topics v-if="data?.user" v-model:user="data.user" />
       </UCard>
   
       <UCard
@@ -74,7 +80,7 @@
           </span>
           <UIcon name="i-lucide-star" />
         </div> 
-        <TopicsCreatedByUser v-if="data?.userTopics" v-model:topics="data.userTopics" />
+        <profile-topics-created-by-user v-if="data?.userTopics" v-model:topics="data.userTopics" :user="data.user" />
       </UCard>
     </div>
 

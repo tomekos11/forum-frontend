@@ -1,7 +1,22 @@
 <template>
   <UPopover mode="hover" :open-delay="400" :close-delay="100">
-    <img v-if="size === 'big'" class="rounded-sm mr-5 w-[100px] max-h-[100px]" :src="user.data?.image || ''">
-    <UAvatar v-else :src="user.data?.image || ''" size="sm" class="mr-1"/>
+
+
+    <UAvatar
+      v-if="size === 'big' && !slots.default"
+      :src="user.data?.image || ''"
+      :alt="user.username || 'Avatar'"
+      :ui="{
+        root: 'inline-table rounded-sm mr-5 w-[100px] max-h-[100px]',
+        fallback: `rounded-sm w-[100px] h-[100px] flex items-center justify-center shadow ${!user.data?.image ? 'bg-slate-900' : ''}`
+      }"
+    />
+
+    <!-- <img v-if="size === 'big' && !slots.default" class="rounded-sm mr-5 w-[100px] max-h-[100px]" :src="user.data?.image || ''"> -->
+
+    <UAvatar v-else-if="!slots.default" :src="user.data?.image || ''" :alt="user?.username || 'Avatar'" size="sm" class="mr-1"/>
+
+    <slot />
     
     <template #content>
       <UCard>
@@ -14,9 +29,10 @@
             </div>
       
             <!-- Prawa część z obrazkiem (avatar) -->
+
             <UAvatar 
               :src="user.data?.image || ''" 
-              alt="Avatar" 
+              :alt="user?.username || 'Avatar'" 
               class="w-12 h-12 rounded-full" 
             />
           </div>
@@ -28,9 +44,6 @@
           </div>
 
           <div class="flex justify-between text-sm my-5">
-            <!-- <div v-for="stat in user.data?.stats" :key="stat">
-            {{ stat }}
-          </div> -->
 
             <div class="flex flex-col items-center justify-center">
               <div>{{ user.data?.stats?.posts }}</div>
@@ -65,4 +78,6 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const slots = useSlots();
 </script>

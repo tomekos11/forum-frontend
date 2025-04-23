@@ -5,7 +5,7 @@
       body: 'px-3',
       header: 'hover:bg-green-800 px-3 transition'
     }"
-    :items="user.followedTopics"
+    :items="user.followedTopics.slice(0, 3)"
   >
     <template #leading="{ item: topic }">
       <div class="flex items-center gap-2 ">
@@ -16,12 +16,7 @@
     </template>
 
     <template #body="{ item: topic }">
-      <!-- <p class="text-sm text-gray-500">
-        Tutaj potencjalny opis tematu <strong>{{ topic.name }}</strong> 
-      </p> -->
-
       <p class="text-sm text-gray-500 line-clamp-3">
-        <!-- {{ topic.posts?.[0]?.content }} -->
         {{ topic.posts?.[0]?.content || 'Brak postów 💥'}}
       </p>
 
@@ -48,6 +43,17 @@
       </UButton>
     </template>
   </UAccordion>
+
+
+  <div v-if="user?.followedTopics?.length" class="mt-4 flex justify-center">
+    <UButton
+      icon="i-lucide-list"
+      color="primary"
+      :to="`/profiles/${user?.username}/followed`"
+    >
+      Wszystkie obserwowane tematy
+    </UButton>
+  </div>
 
   <div v-if="!user?.followedTopics?.length" class="text-sm mt-4">
     <UIcon name="i-lucide-x" class="text-red-500"/> Brak obserwowanych tematów

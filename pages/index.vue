@@ -10,6 +10,8 @@
 
       <div class="text-xl text-center">Forum odnośnie cyberbezpieczeństwa</div>
 
+      <topics-search-bar />
+
       <div class="flex flex-col mt-10">
         <NuxtLink 
           v-for="forum in forums" 

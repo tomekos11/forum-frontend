@@ -72,34 +72,17 @@
     <UPagination  v-if="posts && posts.length" v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2" style="padding-bottom: 200px;"/>
 
     <!-- Input area for new post -->
-    <div
-      v-if="posts && posts.length"
-      class="fixed bottom-0 left-0 w-full p-2 border-t shadow-md z-10"
-      style="background: var(--ui-bg);"
-    >
-      <template v-if="response?.topic.isClosed">
-        <UIcon name="i-lucide-lock" size="xs" />
-        Temat jest zamknięty. Nie można udzielić odpowiedzi
-      </template>
-      <template v-else-if="useUserStore().isLoggedIn">
-        <UTextarea v-model="content" autoresize class="block"/>
-        <UButton label="Dodaj post" class="mx-auto block" @click="addPost"/>
-      </template>
-      <template v-else>
-        <span class="text-green-600 cursor-pointer hover:underline" @click="userBus.emit()">Zaloguj się</span>
-        aby odpowiedzieć
-      </template>
-    </div>
-
+    <add-post v-if="response?.topic && posts && posts.length" :topic="response.topic" @post-added="(post: Post) => posts.push(post)"/>
+      
   </div>
+
 </template>
 
 <script setup lang="ts">
 import type { BreadcrumbItem } from '@nuxt/ui';
-import { useEventBus } from '@vueuse/core';
 import { useUserStore } from '~/stores/user';
 import { useFetchWithAuth } from '~/composables/useFetchWithAuth';
-import type { Meta, Post, Topic } from '~/types/types';
+import type { FollowTopicResponse, Meta, Post, Topic } from '~/types/types';
 
 interface Response {
   meta: Meta;
@@ -111,7 +94,6 @@ const config = useRuntimeConfig();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
-const userBus = useEventBus<string>('user');
 const userStore = useUserStore();
 
 const sortingOptions = ref([
@@ -129,8 +111,6 @@ const sortBy = ref(sortingOptions.value[0][0].value);
 
 const sortByKey = computed(() => sortingOptions.value.flat().find(el => el.value === sortBy.value)?.key);
 const sortByOrder = computed(() => sortingOptions.value.flat().find(el => el.value === sortBy.value)?.order);
-
-const content = ref('');
 
 const items= computed<BreadcrumbItem[]>(() => [
   {
@@ -213,33 +193,6 @@ watch(() => route.query.page, async (nv) => {
 
 const posts = ref<Post[]>(response.value?.data || []);
 
-const addPost = async () => {
-  if(!content.value) return;
-
-  try {
-    const { post, message } = await useFetchWithAuth<{post: Post; message: string}>('/posts', {
-      body: {
-        topicId: response.value?.topic.id,
-        content: content.value
-      },
-      method: 'post',
-    });
-
-    posts.value.push(post);
-
-    toast.add({
-      title: message,
-    });
-  } catch (err) {
-    const errorMessage = err.response?._data?.error || err.message || 'Nieznany błąd';
-
-    toast.add({
-      title: 'Ups wystąpił problem',
-      description: errorMessage
-    });
-  }
-};
-
 const pinPost = async (post: Post) => {
   const shouldUnpin = response.value?.topic.pinnedPost?.id === post.id;
 
@@ -295,12 +248,6 @@ const openTopic = async () => {
   }
 };
 
-interface FollowTopicResponse {
-  followed: true;
-  message: string;
-  topic: Topic;
-}
-
 const followTopic = async (follow: boolean) => {
   if(!response.value?.topic) return;
   
@@ -323,4 +270,10 @@ const followTopic = async (follow: boolean) => {
     console.error(err);
   }
 };
+
+watch(posts, (nv) => {
+  console.log(nv);
+}, {
+  deep: true
+});
 </script>

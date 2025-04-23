@@ -32,7 +32,8 @@
                 :to="`/profiles/${user.username}`"
                 class="user-link flex items-center p-2 rounded hover:bg-slate-800 transition-colors"
               >
-                <UAvatar :src="user.data?.image || ''" size="xs"/>
+                {{ user.username?.[0] }}
+                <UAvatar :src="user.data?.image || ''" :alt="user?.username || 'Avatar'" size="xs"/>
                 <span class="ml-2 text-sm">{{ user.username }}</span>
               </NuxtLink>
             </template>
@@ -52,7 +53,7 @@
       <template v-if="userStore.isLoggedIn">
         <UPopover v-model="isDropdownOpen" placement="bottom-end" @close="isDropdownOpen = false">
           <div class="flex items-center gap-2 cursor-pointer" @click="isDropdownOpen = true">
-            <UAvatar :src="userStore.data?.image || ''" />
+            <UAvatar :src="userStore.data?.image || ''" :alt="userStore?.username || 'Avatar'"  />
             <span>{{ userStore.username }}</span>
           </div>
 

@@ -117,3 +117,9 @@ export interface Notification {
     topicSlug: string;
     topicName: string;
 }
+
+export interface FollowTopicResponse {
+    followed: true;
+    message: string;
+    topic: Topic;
+  }

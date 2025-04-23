@@ -18,11 +18,14 @@
           Aby zmienić zdjęcie naciśnij poniższy guzik i wybierz zdjęcie, które się będzie wyświetlało innym użytkownikom.
         </div>
     
-        <img
-          :src="newImg.preview || defaultAvatar"
-          alt="Avatar"
-          class="rounded-full w-32 h-32 object-cover my-2 mx-auto"
-        >
+        <div class="text-center">
+          <UAvatar
+            :src="newImg.preview || ''"
+            :alt="user?.username || 'Avatar'"
+            class="rounded-full w-32 h-32 object-cover my-2 mx-auto"
+          />
+        </div>
+        
                 
         <!-- Ukryty input -->
         <input
@@ -54,8 +57,7 @@ interface NewImg {
 }
 
 const user = defineModel<User>('user');
-const defaultAvatar = 'https://placehold.co/150x150?text=Avatar';
-  
+
 const newImg = ref<NewImg>({
   preview: user.value?.data?.image || null,
   blob: null
