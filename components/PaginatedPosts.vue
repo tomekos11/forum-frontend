@@ -55,9 +55,13 @@
             </div>
           </div>
 
-          <template v-if="post.postHistories?.length">
-            <div v-if="post.postHistories[0]?.userId === post.userId" class="text-sm text-gray-500">Edytowany: {{ formatDate(post.postHistories[0]?.createdAt) }}</div>
-            <div v-else class="text-sm text-red-500">Edytowany: {{ formatDate(post.postHistories[0]?.createdAt)}} przez {{ post.postHistories[0]?.user.username }}</div>
+          <template v-if="post.postHistories?.length && post.postHistories[0]">
+            <div v-if="post.postHistories[0].editorId === post.userId" class="text-sm text-gray-500">
+              {{post.postHistories[0].isDeleted ? 'Usunięty:' : 'Ostatnia edycja:' }} {{ formatDate(post.postHistories[0].createdAt || '') }}
+            </div>
+            <div v-else class="text-sm text-red-500">
+              {{post.postHistories[0].isDeleted ? 'Usunięty:' : 'Ostatnia edycja:' }} {{ formatDate(post.postHistories[0]?.createdAt || '')}} przez {{ post.postHistories[0]?.editor.username }}
+            </div>
           </template>
           <div class="text-sm text-gray-500 mt-4">Stworzony: {{ formatDate(post.createdAt) }}</div>
         </div>
@@ -105,24 +109,13 @@
                   @click="startEditing(post)"
                 />
 
-                <!-- Delete -->
-                <UButton
+                <post-delete-button
                   v-if="post.user.id === userStore.id || userStore.isAdminOrModerator"
-                  icon="i-lucide-x"
-                  label="Usuń"
-                  color="error"
-                  variant="soft"
-                  @click="startDeleting(post)"
+                  :post="post"
+                  @delete="onDelete"
                 />
 
-                <!-- Report -->
-                <UButton
-                  v-if="post.user.id !== userStore.id"
-                  icon="i-lucide-message-circle-warning"
-                  label="Zgłoś"
-                  color="error"
-                  variant="soft"
-                />
+                <post-report-button v-if="post.user.id !== userStore.id" :post="post" />
       
               </div>
             </template>
@@ -132,49 +125,7 @@
         </div>
       </div>
     </div>
-  
 
-    <UModal v-model:open="isDeleteModalOpen" title="Potwierdzenie usunięcia">
-      <template v-if="deletingPost" #content>
-        <div class="p-5">
-          <div
-            class="p-4 rounded-lg bg-slate-800  shadow-sm"
-          >
-            <div class="flex">
-              <UserImgWithPopover :user="deletingPost.user" size="big" />
-
-              <div class="w-full">
-                <h3 class="font-semibold text-lg text-green-600">{{ deletingPost.user.username }}</h3>
-                <p class="text-gray-200">{{ deletingPost.content }}</p>
-              </div>
-            </div>
-          </div>
-                
-
-
-          <div class="p-5">
-            <p class="text-justify">Czy na pewno chcesz usunąć ten post? Tego działania nie można cofnąć.</p>
-        
-            <div class="flex justify-end gap-2 mt-4">
-              <!-- Anulowanie -->
-              <UButton 
-                label="Anuluj" 
-                color="neutral" 
-                variant="outline" 
-                @click="isDeleteModalOpen = false"
-              />
-          
-              <!-- Potwierdzenie usunięcia -->
-              <UButton 
-                label="Usuń" 
-                color="error" 
-                @click="deletePost"
-              />
-            </div>
-          </div>
-        </div>
-      </template>
-    </UModal>
   </div>
 </template>
 
@@ -211,9 +162,6 @@ const userStore = useUserStore();
 const toast = useToast();
 
 const editing = ref<Editing | null>(null);
-const deletingPost = ref<Post | null>(null);
-
-const isDeleteModalOpen = ref(false);
 
 const isPostPinned = (post: Post) => {
   return post.id === props.pinnedPost?.id;
@@ -265,46 +213,19 @@ const saveContent = async () => {
   }
 };
 
-const startDeleting = (post: Post) => {
-  deletingPost.value = post; 
-  isDeleteModalOpen.value = true;
-};
+const onDelete = (p: Post) => {
+  const foundIndex = posts.value.findIndex(post => post.id === p.id);
 
-const deletePost = async () => {
-  if(!deletingPost.value) return;
-
-  try {
-
-    await useFetchWithAuth('/posts', {
-      body: {
-        postId: deletingPost.value.id
-      },
-      method: 'delete',
-    });
-
-    const found = posts.value.find(post => post.id === deletingPost.value?.id);
-
-    if(found) {
-      found.content = '[Post został usunięty]';
-      found.isDeleted = true;
-    }
-
-    deletingPost.value = null;
-
-    toast.add({
-      title: 'Poprawnie usunięto post',
-    });
-
-    isDeleteModalOpen.value = false;
-  } catch (err) {
-    const errorMessage = err.response?._data?.error || err.message || 'Nieznany błąd';
-
-    toast.add({
-      title: 'Ups wystąpił problem',
-      description: errorMessage
-    });
+  if(foundIndex !== -1) {
+    console.log('przypisuje');
+    posts.value[foundIndex] = p;
   }
+
+  toast.add({
+    title: 'Poprawnie usunięto post',
+  });
 };
+
 </script>
 
 <style scoped>

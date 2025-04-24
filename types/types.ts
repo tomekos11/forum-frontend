@@ -54,11 +54,11 @@ export interface User {
 
 export interface PostHistory {
     content: string;
-    deletedBy: null | string;
+    isDeleted: boolean;
     id: number;
     postId: number;
-    userId: number;
-    user: User;
+    editorId: number;
+    editor: User;
     createdAt: string | null;
     updatedAt: string | null;
 }

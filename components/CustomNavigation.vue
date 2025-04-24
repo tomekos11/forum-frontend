@@ -61,23 +61,24 @@
           </div>
 
           <template #content>
-            <div class="dropdown-menu">
+            <div class="dropdown-menu bg-slate-800">
               <UButton 
                 label="Profil" 
-                color="neutral"
-                class="hover:bg-gray-200"
+                icon="i-lucide-user"
+                variant="ghost"
                 :to="`/profiles/${userStore.username}`"
               />
               <UButton 
-                label="Ustawienia" 
-                color="neutral"
-                class="hover:bg-gray-200"
-                @click="() => console.log(2)"
+                label="Zgłoszenia" 
+                icon="i-lucide-message-circle-warning"
+                variant="ghost"
+                to="/reports"
               />
               <UButton 
                 label="Wyloguj się" 
-                color="neutral"
-                class="text-red-500 hover:bg-red-100" 
+                color="error"
+                icon="i-lucide-log-out"
+                variant="ghost"
                 @click="userStore.logout()"
               />
             </div>
@@ -150,10 +151,8 @@ watch(usernameToSearch, (nv) => {
 .dropdown-menu {
   display: flex;
   flex-direction: column;
-  background-color: white !important;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
   padding: 8px;
 }
 
@@ -164,10 +163,6 @@ watch(usernameToSearch, (nv) => {
 
 .dropdown-item:last-child {
   margin-bottom: 0;
-}
-
-.dropdown-item:hover {
-  background-color: #f3f4f6;
 }
 
 .user-link {
