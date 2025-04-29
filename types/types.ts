@@ -139,3 +139,9 @@ export interface FollowTopicResponse {
     message: string;
     topic: Topic;
   }
+
+  
+export interface EditPost {
+    postId: number;
+    content: string;
+}

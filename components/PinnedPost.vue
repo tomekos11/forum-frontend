@@ -3,19 +3,19 @@
     class="p-4 rounded-lg shadow-sm bg-teal-950"
   >
     <div class="flex">
-      <UserImgWithPopover :user="post.user" size="big" />
+      <UserImgWithPopover :user="pinnedPost!.user" size="big" />
       <div>
-        <h3 class="font-semibold text-lg text-green-600">{{ post.user.username }}</h3>
+        <h3 class="font-semibold text-lg text-green-600">{{ pinnedPost!.user.username }}</h3>
 
         <!-- Tryb wyświetlania i edycji -->
         <div>
-          <p class="text-gray-200">{{ post.content }}</p>
+          <p class="text-gray-200">{{ pinnedPost!.content }}</p>
         </div>
 
-        <small class="text-gray-500">{{ formatDate(post.createdAt) }}</small>
+        <small class="text-gray-500">{{ formatDate(pinnedPost!.createdAt) }}</small>
       </div>
 
-      <div v-if="!post.isDeleted" class="ml-auto flex gap-2 flex-col justify-between items-end">
+      <div v-if="!pinnedPost!.isDeleted" class="ml-auto flex gap-2 flex-col justify-between items-end">
 
         <div class="flex gap-1">
           <UButton label="Wyrózniony post" icon="i-lucide-pin" variant="ghost"/>
@@ -32,7 +32,7 @@
             <template #footer>
               <div class="flex justify-end gap-2 ml-auto">
                 <UButton label="Zamknij" color="error" @click="showUnpinPostModal = false"/>
-                <UButton label="Odepnij post" @click="$emit('unpin', post)"/>
+                <UButton label="Odepnij post" @click="togglePostPin(pinnedPost!)"/>
               </div>
             </template>
           </UModal>
@@ -42,7 +42,7 @@
           </UTooltip>
         </div>
 
-        <reaction-segment v-if="post" :post="post" />
+        <reaction-segment v-if="pinnedPost" :post="pinnedPost" />
       </div>
     </div>
 
@@ -52,38 +52,13 @@
 <script setup lang="ts">
 import { formatDate } from '~/helpers/date';
 import { useUserStore } from '~/stores/user';
-import type { Post, Topic } from '~/types/types';
+import { usePostsStore } from '~/stores/posts';
 
-// Props
-interface Props {
-  post: Post;
-}
-
-defineProps<Props>();
 useToast();
+
+const { pinnedPost, togglePostPin } = usePostsStore();
 const userStore = useUserStore();
 
 const showUnpinPostModal = ref(false);
 
-defineEmits(['unpin']);
-
-// const unpinPost = async () => {
-//   try {
-//     const { message } = await useFetchWithAuth<{message: string; topic: Topic}>('/posts/pin', {
-//       body: {
-//         topicId: props.post.topicId,
-//         postId: null,
-//       },
-//       method: 'POST'
-//     });
-    
-//     toast.add({
-//       title: message,
-//     });
-
-//     showUnpinPostModal.value = false;
-//   } catch (e) {
-//     console.error(e);
-//   }
-// };
 </script>

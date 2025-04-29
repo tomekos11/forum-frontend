@@ -8,14 +8,24 @@
       Temat jest zamknięty. Nie można udzielić odpowiedzi
     </template>
     <template v-else-if="userStore.isLoggedIn">
-      <UTextarea v-model="content" autoresize class="block"/>
-      <UButton label="Dodaj post" class="mx-auto block" @click="addPost"/>
+      <UTextarea v-if="write" v-model="content" autoresize class="block"/>
+
+      <div v-else class="prose max-w-none pb-8" v-html="parsedContent"/>
+      
+      <div class="py-5 flex justify-center gap-2 ">
+        <UButton label="Dodaj post" variant="soft" @click="addPost"/>
+        <UButton v-if="content.length" :label="write ? 'Podgląd' : 'Wróć do pisania'" color="info" variant="soft" @click="toggleView"/>
+      </div>
+
+      
     </template>
     <template v-else>
       <span class="text-green-600 cursor-pointer hover:underline" @click="userBus.emit()">Zaloguj się</span>
       aby odpowiedzieć
     </template>
+
   </div>
+  
 </template>
 
 <script setup lang="ts">
@@ -32,10 +42,18 @@ const userStore = useUserStore();
 
 const content = ref('');
 const userBus = useEventBus<string>('user');
+const quoteBus = useEventBus<string>('quote');
+
 const toast = useToast();
 
 const props = defineProps<Props>();
 const emit = defineEmits(['post-added']);
+
+const write = ref(true);
+
+const toggleView = () => {
+  write.value = !write.value;
+};
 
 const addPost = async () => {
   if(!content.value) return;
@@ -64,5 +82,27 @@ const addPost = async () => {
     });
   }
 };
+
+const unsubscribe = quoteBus.on((event, payload: string) => addQuote(payload));
+
+const addQuote = (payload: string) => {
+  const spacing = '\n\n';
+
+  content.value = `${content.value}${content.value ? spacing : ''}[quote]${payload}[/quote]`;
+};
+
+const parsedContent = computed(() => {
+  return content.value.replace(/\[quote](.*?)\[\/quote]/gs, (_, quoteText) => {
+    return `
+      <blockquote class="border-l-4 border-emerald-500 bg-gray-50 dark:bg-gray-800 p-4 my-4">
+        <p class="text-gray-900 dark:text-gray-100">${quoteText.trim()}</p>
+      </blockquote>
+    `;
+  });
+});
+
+onBeforeUnmount(() => {
+  unsubscribe();
+});
 
 </script>

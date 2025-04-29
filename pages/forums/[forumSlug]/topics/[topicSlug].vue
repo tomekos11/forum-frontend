@@ -24,8 +24,8 @@
       <!-- Paginacja -->
       <UPagination
         v-model:page="page"
-        :items-per-page="response?.meta.perPage"
-        :total="response?.meta.total || 0"
+        :items-per-page="postsStore.meta?.perPage || 10"
+        :total="postsStore.meta?.total || 0"
         class="mb-2 sm:mb-0"
       />
 
@@ -33,11 +33,11 @@
       <div>
 
         <UTooltip text="Temat jest zamknięty" >
-          <UIcon v-if="response?.topic.isClosed" name="i-lucide-lock" size="xs" class="mr-5" />
+          <UIcon v-if="postsStore.topic?.isClosed" name="i-lucide-lock" size="xs" class="mr-5" />
         </UTooltip>
 
         <UTooltip text="Obserwujesz ten temat">
-          <UIcon v-if="response?.topic.isFollowed" name="i-lucide-eye" size="xs" class="mr-5" />
+          <UIcon v-if="postsStore.topic?.isFollowed" name="i-lucide-eye" size="xs" class="mr-5" />
         </UTooltip>
 
         <UDropdownMenu
@@ -50,12 +50,12 @@
           <template #item>
             <div class="flex flex-col gap-1">
               <template v-if="userStore.isAdminOrModerator">
-                <UButton v-if="!response?.topic.isClosed" label="Zamknij temat" variant="ghost" color="neutral" icon="i-lucide-lock" @click="closeTopic" />
-                <UButton v-else label="Otwórz temat" variant="ghost" color="neutral" icon="i-lucide-key" @click="openTopic" />
+                <UButton v-if="!postsStore.topic?.isClosed" label="Zamknij temat" variant="ghost" color="neutral" icon="i-lucide-lock" @click="postsStore.closeTopic" />
+                <UButton v-else label="Otwórz temat" variant="ghost" color="neutral" icon="i-lucide-key" @click="postsStore.openTopic" />
               </template>
 
-              <UButton v-if="!response?.topic.isFollowed" label="Obserwuj temat" variant="ghost" color="neutral" icon="i-lucide-eye" @click="followTopic(true)" />
-              <UButton v-else label="Przestań obserwować temat" variant="ghost" color="neutral" icon="i-lucide-eye-off" @click="followTopic(false)" />
+              <UButton v-if="!postsStore.topic?.isFollowed" label="Obserwuj temat" variant="ghost" color="neutral" icon="i-lucide-eye" @click="postsStore.followTopic(true)" />
+              <UButton v-else label="Przestań obserwować temat" variant="ghost" color="neutral" icon="i-lucide-eye-off" @click="postsStore.followTopic(false)" />
             </div>
           </template>
         </UDropdownMenu>
@@ -63,16 +63,15 @@
 
     </div>
 
-    <pinned-post v-if="response?.topic && response.topic.pinnedPost" :post="response.topic.pinnedPost" class="mb-2" @unpin="pinPost"/>
+    <pinned-post v-if="postsStore.pinnedPost" class="mb-2" />
 
     <post-loading v-if="postLoadingStatus === 'pending'" />
-    <paginated-posts v-else-if="posts && posts.length" :posts="posts" :pinned-post="response?.topic.pinnedPost || null" class="mt-5" @pin-post="pinPost" />
+    <paginated-posts v-else :posts="postsStore.posts" :pinned-post="postsStore.topic?.pinnedPost || null" class="mt-5" />
 
 
-    <UPagination  v-if="posts && posts.length" v-model:page="page" :items-per-page="response?.meta.perPage" :total="response?.meta.total || 0" class="mt-5 ml-auto mb-2" style="padding-bottom: 200px;"/>
+    <UPagination  v-if="postsStore.posts && postsStore.posts.length" v-model:page="page" :items-per-page="postsStore.meta?.perPage" :total="postsStore.meta?.total || 0" class="mt-5 ml-auto mb-2" style="padding-bottom: 200px;"/>
 
-    <!-- Input area for new post -->
-    <add-post v-if="response?.topic && posts && posts.length" :topic="response.topic" @post-added="(post: Post) => posts.push(post)"/>
+    <add-post v-if="postsStore?.topic && postsStore.posts && postsStore.posts.length" :topic="postsStore.topic" @post-added="(post: Post) => postsStore.posts.push(post)"/>
       
   </div>
 
@@ -81,20 +80,14 @@
 <script setup lang="ts">
 import type { BreadcrumbItem } from '@nuxt/ui';
 import { useUserStore } from '~/stores/user';
-import { useFetchWithAuth } from '~/composables/useFetchWithAuth';
-import type { FollowTopicResponse, Meta, Post, Topic } from '~/types/types';
-
-interface Response {
-  meta: Meta;
-  topic: Topic;
-  data: Post[];
-}
+import type { Post } from '~/types/types';
+import { usePostsStore } from '~/stores/posts';
 
 const config = useRuntimeConfig();
 const route = useRoute();
 const router = useRouter();
-const toast = useToast();
 const userStore = useUserStore();
+const postsStore = usePostsStore();
 
 const sortingOptions = ref([
   [
@@ -140,137 +133,36 @@ const { data: topicName } = useFetch<string>(`${config.public.API_URL}/topics/na
   }
 });
 
-const { data: response, refresh, status: postLoadingStatus } = useAsyncData(
-  `topic-${route.params.topicSlug}-${useUserStore().username}-${route.query.page || 1}-${sortBy.value}`,
-  async () => {
-
-    const res = await useFetchWithAuth<Response>(`/posts/${route.params.topicSlug}`, {
-      params: {
-        page: Number(route.query.page) || 1,
-        perPage: 10,
-        sortBy: sortByKey.value,
-        order: sortByOrder.value,
-      },
-    });
-
-    posts.value = res.data;
-
-    return res;
-  },
-  { server: true }
+const fetchKey = computed(() => 
+  `posts-${route.params.topicSlug}-${route.query.page}-${sortBy.value}`
 );
+
+const { refresh, status: postLoadingStatus } = await useAsyncData(
+  fetchKey.value,
+  () => postsStore.fetchPosts(
+    route.params.topicSlug as string,
+    {
+      page: Number(route.query.page) || 1,
+      perPage: 10,
+      sortBy: sortByKey.value,
+      order: sortByOrder.value
+    }
+  ),
+  {
+    server: true,
+    watch: [() => route.query.page, sortBy]
+  }
+);
+
+const page = computed({
+  get: () => Number(route.query.page) || 1,
+  set: (value) => {
+    router.replace({ query: { ...route.query, page: value } });
+  }
+});
 
 watch(() => useUserStore().isLoggedIn, async () => {
   setTimeout(() => refresh(), 100);
 });
 
-const page = ref(Number(route.query.page) || 1);
-
-router.replace({
-  query: {
-    ...route.query,
-    page: String(page.value),
-  },
-});
-
-watch(page, async () => {
-  await router.replace({
-    query: {
-      ...route.query,
-      page: String(page.value),
-    },
-  });
-
-});
-
-
-watch(() => route.query.page, async (newVal, oldVal) => {
-  if(newVal) {
-    page.value = Number(newVal);
-  }
-  
-  if(oldVal) {
-    refresh();
-  }
-});
-
-const posts = ref<Post[]>(response.value?.data || []);
-
-const pinPost = async (post: Post) => {
-  const shouldUnpin = response.value?.topic.pinnedPost?.id === post.id;
-
-  try {
-    const { message, topic } = await useFetchWithAuth<{message: string; topic: Topic}>('/posts/pin', {
-      body: {
-        topicId: post.topicId,
-        postId: shouldUnpin ? null : post.id,
-      },
-      method: 'POST'
-    });
-
-
-    if(response.value) {
-      response.value.topic = topic;
-    }
-    
-    toast.add({
-      title: message,
-    });
-
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-const closeTopic = async () => {
-  if(!response.value?.topic) return;
-  
-  try {
-    const res = await useFetchWithAuth<Topic>(`/topics/${response.value.topic.slug}/close`, {
-      method: 'PATCH',
-    });
-
-    response.value.topic = res;
-  } catch (err) {
-    console.error(err);
-  }
-  
-};
-
-const openTopic = async () => {
-  if(!response.value?.topic) return;
-  
-  try {
-    const res = await useFetchWithAuth<Topic>(`/topics/${response.value.topic.slug}/open`, {
-      method: 'PATCH',
-    });
-
-    response.value.topic = res;
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-const followTopic = async (follow: boolean) => {
-  if(!response.value?.topic) return;
-  
-  try {
-    const { message, topic } = await useFetchWithAuth<FollowTopicResponse>('/topics/follow', {
-      method: 'POST',
-      body: {
-        topicId: response.value?.topic.id,
-        follow
-      }
-    });
-
-    response.value.topic = topic;
-
-    toast.add({
-      title: message
-    });
-
-  } catch (err) {
-    console.error(err);
-  }
-};
 </script>

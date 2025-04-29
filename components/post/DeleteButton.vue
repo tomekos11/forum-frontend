@@ -52,6 +52,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { usePostsStore } from '~/stores/posts';
 import type { Post } from '~/types/types';
 
 interface Props {
@@ -59,34 +60,13 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits(['delete']);
-
-const toast = useToast();
 
 const showModal = ref(false);
+const postsStore = usePostsStore();
 
 const deletePost = async () => {
-  if(!props.post) return;
-
-  try {
-
-    const { post } = await useFetchWithAuth<{message: string; post: Post}>('/posts', {
-      body: {
-        postId: props.post.id
-      },
-      method: 'delete',
-    });
-
-    emit('delete', post);
-
+  if(await postsStore.deletePost(props.post)) {
     showModal.value = false;
-  } catch (err) {
-    const errorMessage = err.response?._data?.error || err.message || 'Nieznany błąd';
-
-    toast.add({
-      title: 'Ups wystąpił problem',
-      description: errorMessage
-    });
   }
 };
 

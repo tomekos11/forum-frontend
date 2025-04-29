@@ -1,4 +1,3 @@
-import { defineStore } from 'pinia';
 import type { Notification, User } from '~/types/types';
 
 export const useUserStore = defineStore('user', () => {
