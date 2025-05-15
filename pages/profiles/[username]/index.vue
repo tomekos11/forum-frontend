@@ -4,12 +4,6 @@
     <UCard class="flex-sm-2 flex-md-3 text-center bg-slate-950 w-full sm:w-[min(500px,100%)]">
       <div v-if="data?.user" class="flex flex-col items-center space-y-4">
         <div class="relative inline-block w-fit">
-          <!-- <img
-            :src="data.user.data?.image || ''"
-            alt="Avatar"
-            class="rounded-full w-32 h-32 object-cover"
-          > -->
-          
           <UAvatar
             :src="data.user.data?.image || ''"
             :alt="data.user.username || 'Avatar'"

@@ -2,11 +2,12 @@
   <UContainer>
     <div v-if="data?.user" class="flex flex-wrap items-center space-y-4 mt-3">
       <user-img-with-popover :user="data.user" >
-        <img
+        <UAvatar
           :src="data.user.data?.image || ''"
-          alt="Avatar"
-          class="rounded-full w-32 h-32 object-cover"
-        >
+          :alt="data.user.username || 'Avatar'"
+          class="w-32 h-32 rounded-full object-cover"
+        />
+
       </user-img-with-popover>
 
       <div class="sm:ml-5">
