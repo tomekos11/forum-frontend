@@ -8,10 +8,18 @@
       <div class="flex flex-row sm:flex-col items-center sm:items-start gap-2">
         <UserImgWithPopover :user="post.user" :size="isMobile ? 'small' : 'big'" />
 
-        <div class="flex flex-col sm:items-start items-start sm:mt-1 leading-tight">
-          <h3 v-if="isMobile" class="font-semibold text-xl sm:text-xl text-green-600">{{ post.user.username }}</h3>
-          <div class="text-sm sm:text-xs text-gray-500">{{ formatDateShort(post.createdAt) }}</div>
+        <div class="flex items-center justify-between sm:mt-1 leading-tight w-full">
+          <div class="flex flex-col sm:items-start items-start">
+            <h3 v-if="isMobile" class="font-semibold text-xl sm:text-xl text-green-600">
+              {{ post.user.username }}
+            </h3>
+            <div class="text-sm sm:text-xs text-gray-500">{{ formatDateShort(post.createdAt) }}</div>
+          </div>
+
+          <post-options-menu v-if="isMobile" :post="post" @edit="startEditing(post)" />
         </div>
+
+
       </div>
 
       <!-- Treść posta -->
@@ -62,62 +70,26 @@
       </div>
 
       <!-- Opcje i reakcje -->
-      <div v-if="!post.isDeleted" class="sm:ml-auto flex gap-2 flex-row sm:flex-col justify-between items-end">
-        <UPopover :popper="{ placement: 'bottom-end' }">
-          <UButton icon="i-lucide-more-vertical" size="md" variant="ghost" color="neutral" />
-
-          <template #content>
-            <div class="flex flex-col gap-1 p-2 min-w-[160px]">
-              <!-- Pin post -->
-              <UButton
-                v-if="userStore.isAdminOrModerator"
-                :icon="isPostPinned(post) ? 'i-lucide-badge-check' : 'i-lucide-badge-check'"
-                :label="isPostPinned(post) ? 'Odznacz jako wyróżniony' : 'Wyróżnij post'"
-                :color="isPostPinned(post) ? 'error' : 'neutral'"
-                :variant="isPostPinned(post) ? 'ghost' : 'soft'"
-                @click="postsStore.togglePostPin(post)"
-              />
-
-              <div
-                v-else-if="isPostPinned(post)"
-                class="flex items-center gap-2 text-sm text-primary"
-              >
-                <UIcon name="i-lucide-badge-check" />
-                <span>Wyróżniony post</span>
-              </div>
-
-              <!-- Reply -->
-              <UButton
-                icon="i-lucide-reply"
-                label="Odpowiedz"
-                color="info"
-                variant="soft"
-              />
-
-              <!-- Edit -->
-              <UButton
-                v-if="post.user.id === userStore.id || userStore.isAdminOrModerator"
-                icon="i-lucide-pencil"
-                label="Edytuj"
-                :color="userStore.isAdminOrModerator ? 'primary' : 'info'"
-                variant="soft"
-                @click="startEditing(post)"
-              />
-
-              <post-delete-button
-                v-if="post.user.id === userStore.id || userStore.isAdminOrModerator"
-                :post="post"
-              />
-
-              <post-report-button v-if="post.user.id !== userStore.id" :post="post" />
-            </div>
-          </template>
-        </UPopover>
-
-        <reaction-segment v-if="post" :post="post" />
+      <div
+        v-if="!post.isDeleted"
+        class="sm:ml-auto flex gap-2 flex-row sm:flex-col justify-between items-end"
+      >
+        <post-options-menu
+          v-if="!isMobile"
+          :post="post"
+          @edit="startEditing(post)"
+        />
+        <reaction-segment
+          v-if="post"
+          :post="post"
+          class="ml-auto sm:ml-0"
+        />
       </div>
+
+      
     </div>
   </div>
+
 </template>
 
 <script setup lang="ts">
@@ -126,7 +98,6 @@ import DOMPurify from 'dompurify';
 import type { EditPost, Post } from '~/types/types';
 import { useUserStore } from '~/stores/user';
 import { formatDate, formatDateShort } from '~/helpers/date';
-import { usePostsStore } from '~/stores/posts';
 
 interface Props {
   post: Post;
@@ -135,7 +106,6 @@ interface Props {
 const props = defineProps<Props>();
 
 const userStore = useUserStore();
-const postsStore = usePostsStore();
 
 const quoteBus = useEventBus<string>('quote');
 
@@ -144,17 +114,15 @@ const editPost = ref<EditPost | null>(null);
 const shouldEditPost = computed(() => editPost.value?.postId === props.post.id);
 
 const isMobile = ref(false);
+const isReady = ref(false);
 
 onMounted(() => {
   isMobile.value = window.innerWidth < 640;
+  isReady.value = true;
   window.addEventListener('resize', () => {
     isMobile.value = window.innerWidth < 640;
   });
 });
-
-const isPostPinned = (post: Post) => {
-  return post.id === postsStore.pinnedPost?.id;
-};
 
 const startEditing = (post: Post) => {
   editPost.value = {
