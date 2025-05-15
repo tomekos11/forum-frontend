@@ -3,9 +3,11 @@
     :class="`p-4 rounded-lg bg-slate-800  ${post.notification ? 'shadow-[0_4px_12px_rgba(0,255,0,0.3)]' : 'shadow-sm'}`"
   >
     <div class="flex">
-      <UserImgWithPopover :user="post.user" size="big" />
-
-      <div class="w-full">
+      <div class="flex flex-col">
+        <UserImgWithPopover :user="post.user" size="big" />
+        <div class="text-sm text-gray-500 mt- text-xs">{{ formatDateShort(post.createdAt) }}</div>
+      </div>
+      <div class="w-full flex flex-col min-h-full">
         <h3 class="font-semibold text-lg text-green-600">{{ post.user.username }}</h3>
 
         <post-edit-content
@@ -14,9 +16,8 @@
           @cancel="editPost = null"
         />
 
-        <div v-else style="position: relative;" >
+        <div v-else>
           <p class="text-gray-200" @mouseup="showMenuIfTextSelected">
-
             <span v-html="parsedContent" />
           </p>
 
@@ -26,13 +27,8 @@
             v-if="userStore.isLoggedIn"
             v-model:open="showMenu"
             :disable-hoverable-content="true"
-            :ui="{
-              content: 'h-fit w-fit'
-            }"
-            :content="{
-              align: 'center',
-              side: 'bottom',
-            }"
+            :ui="{ content: 'h-fit w-fit' }"
+            :content="{ align: 'center', side: 'bottom' }"
           >
             <div/>
             <template #content>
@@ -41,16 +37,22 @@
           </UTooltip>
         </div>
 
-        <template v-if="post.postHistories?.length && post.postHistories[0]">
-          <div v-if="post.postHistories[0].editorId === post.userId" class="text-sm text-gray-500">
-            {{post.postHistories[0].isDeleted ? 'Usunięty:' : 'Ostatnia edycja:' }} {{ formatDate(post.postHistories[0].createdAt || '') }}
-          </div>
-          <div v-else class="text-sm text-red-500">
-            {{post.postHistories[0].isDeleted ? 'Usunięty:' : 'Ostatnia edycja:' }} {{ formatDate(post.postHistories[0]?.createdAt || '')}} przez {{ post.postHistories[0]?.editor.username }}
-          </div>
-        </template>
-        <div class="text-sm text-gray-500 mt-4">Stworzony: {{ formatDate(post.createdAt) }}</div>
+        <!-- Stopka z informacją o edycji/usunięciu -->
+        <div class="mt-auto pt-4 text-sm">
+          <template v-if="post.postHistories?.length && post.postHistories[0]">
+            <div v-if="post.postHistories[0].editorId === post.userId" class="text-gray-500">
+              {{ post.postHistories[0].isDeleted ? 'Usunięty:' : 'Ostatnia edycja:' }}
+              {{ formatDate(post.postHistories[0].createdAt || '') }}
+            </div>
+            <div v-else class="text-red-500">
+              {{ post.postHistories[0].isDeleted ? 'Usunięty:' : 'Ostatnia edycja:' }}
+              {{ formatDate(post.postHistories[0]?.createdAt || '') }}
+              przez {{ post.postHistories[0]?.editor.username }}
+            </div>
+          </template>
+        </div>
       </div>
+
 
       <div v-if="!post.isDeleted" class="ml-auto flex gap-2 flex-col justify-between items-end">
         <UPopover :popper="{ placement: 'bottom-end' }">
@@ -117,7 +119,7 @@ import { useEventBus, useTextSelection } from '@vueuse/core';
 import DOMPurify from 'dompurify';
 import type { EditPost, Post } from '~/types/types';
 import { useUserStore } from '~/stores/user';
-import { formatDate } from '~/helpers/date';
+import { formatDate, formatDateShort } from '~/helpers/date';
 import { usePostsStore } from '~/stores/posts';
 
 interface Props {
