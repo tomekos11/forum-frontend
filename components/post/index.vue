@@ -9,13 +9,13 @@
         <UserImgWithPopover :user="post.user" :size="isMobile ? 'small' : 'big'" />
 
         <div class="flex flex-col sm:items-start items-start sm:mt-1 leading-tight">
-          <h3 class="font-semibold text-xl sm:text-xl text-green-600">{{ post.user.username }}</h3>
-          <div class="text-sm text-gray-500">{{ formatDateShort(post.createdAt) }}</div>
+          <h3 v-if="isMobile" class="font-semibold text-xl sm:text-xl text-green-600">{{ post.user.username }}</h3>
+          <div class="text-sm sm:text-xs text-gray-500">{{ formatDateShort(post.createdAt) }}</div>
         </div>
       </div>
 
       <!-- Treść posta -->
-      <div class="w-full flex flex-col min-h-full sm:ml-4">
+      <div class="w-full flex flex-col min-h-full">
         <h3 v-if="!isMobile" class="font-semibold text-lg text-green-600">{{ post.user.username }}</h3>
 
         <post-edit-content
