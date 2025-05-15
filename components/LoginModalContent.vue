@@ -35,15 +35,118 @@
         </div>
       
         <div label="Nazwa użytkownika" name="username" class="flex flex-col">
-          <UInput v-model="form.username" placeholder="Wpisz nazwę użytkownika" />
+          <UInput
+            v-model="form.username"
+            placeholder="Wpisz nazwę użytkownika"
+            @focus="usernameFocused = true"
+            @blur="usernameFocused = false"
+          />
+
+          <UCollapsible v-model:open="usernameFocused" >
+            <template #content>
+              <div class="mt-2">
+    
+                <p class="text-sm font-medium">
+                  {{ usernameText }}. Musi zawierać:
+                </p>
+    
+                <ul class="space-y-1" aria-label="Password requirements">
+                  <li
+                    v-for="(req, index) in usernameStrength"
+                    :key="index"
+                    class="flex items-center gap-0.5"
+                    :class="req.met ? 'text-green-600' : 'text-gray-400'"
+                  >
+                    <UIcon :name="req.met ? 'i-lucide-circle-check' : 'i-lucide-circle-x'" class="size-4 shrink-0" />
+    
+                    <span class="text-xs font-light">
+                      {{ req.text }}
+                      <span class="sr-only">
+                        {{ req.met ? ' - Requirement met' : ' - Requirement not met' }}
+                      </span>
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </template>
+          </UCollapsible>
         </div>
 
         <div label="Hasło" name="password" class="flex flex-col">
-          <UInput v-model="form.password" type="password" placeholder="Wpisz hasło" />
+          <UInput
+            v-model="form.password"
+            type="password"
+            placeholder="Wpisz hasło"
+            @focus="passwordFocused = true"
+            @blur="passwordFocused = false"
+          />
+
+          <UCollapsible v-model:open="passwordFocused" >
+            <template #content>
+              <div class="mt-2">
+                <UProgress
+                  :color="passwordColor"
+                  :indicator="passwordText"
+                  :model-value="passwordScore"
+                  :max="4"
+                  size="sm"
+                />
+    
+                <p class="text-sm font-medium">
+                  {{ passwordText }}. Musi zawierać: 
+                </p>
+    
+                <ul class="space-y-1" aria-label="Password requirements">
+                  <li
+                    v-for="(req, index) in passwordStrength"
+                    :key="index"
+                    class="flex items-center gap-0.5"
+                    :class="req.met ? 'text-green-600' : 'text-gray-400'"
+                  >
+                    <UIcon :name="req.met ? 'i-lucide-circle-check' : 'i-lucide-circle-x'" class="size-4 shrink-0" />
+    
+                    <span class="text-xs font-light">
+                      {{ req.text }}
+                      <span class="sr-only">
+                        {{ req.met ? ' - Requirement met' : ' - Requirement not met' }}
+                      </span>
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </template>
+          </UCollapsible>
         </div>
 
         <div label="Powtórz hasło" name="confirmPassword" class="flex flex-col">
-          <UInput v-model="form.confirmPassword" type="password" placeholder="Powtórz hasło" />
+          <UInput
+            v-model="form.confirmPassword"
+            type="password"
+            placeholder="Powtórz hasło"
+            @focus="confirmPasswordFocused = true"
+            @blur="confirmPasswordFocused = false"
+          />
+
+          <UCollapsible v-model:open="confirmPasswordFocused" >
+            <template #content>
+              <div class="mt-2">
+
+                <p class="text-sm font-medium">
+                  <template v-if="!form.confirmPassword.length">
+                    Wpisz takie samo hasło jak w poprzednim polu
+                  </template>
+                  <template v-else>
+                    <UIcon
+                      :name="form.password === form.confirmPassword ? 'i-lucide-circle-check' : 'i-lucide-circle-x'"
+                      :class="`size-4 shrink-0 ${form.password === form.confirmPassword ? 'text-green-600': 'text-red-600'}`"
+                    />
+
+                    {{ form.password === form.confirmPassword ? 'Hasła zgadzają się' : 'Podano dwa różne hasła' }}
+                  </template>
+                </p>
+              </div>
+            </template>
+          </UCollapsible>
         </div>
 
         <UButton type="submit" label="Zarejestruj się" class="w-full bg-green-500 text-white hover:bg-green-600" />
@@ -93,6 +196,59 @@ const onSubmit = async () => {
   }
 };
 
+
+
+const checkPasswordStrength = (str: string) => {
+  const requirements = [
+    { regex: /.{8,}/, text: 'Co najmniej 8 znaków' },
+    { regex: /\d/, text: 'Co najmniej 1 numer' },
+    { regex: /[!@#$%^&*(),.?":{}|<>]/, text: 'Co najmniej 1 znak specjalny' },
+    { regex: /[A-Z]/, text: 'Co najmniej 1 duża litera' }
+  ];
+
+  return requirements.map(req => ({ met: req.regex.test(str), text: req.text }));
+};
+
+const passwordFocused = ref(false);
+const passwordStrength = computed(() => checkPasswordStrength(form.password));
+const passwordScore = computed(() => passwordStrength.value.filter(req => req.met).length);
+
+const passwordColor = computed(() => {
+  if (passwordScore.value === 0) return 'neutral';
+  if (passwordScore.value <= 1) return 'error';
+  if (passwordScore.value <= 2) return 'warning';
+  if (passwordScore.value === 3) return 'warning';
+  return 'success';
+});
+
+const passwordText = computed(() => {
+  if (passwordScore.value === 0) return 'Wpisz hasło';
+  if (passwordScore.value <= 2) return 'Słabe hasło';
+  if (passwordScore.value === 3) return 'Średnie hasło';
+  return 'Mocne hasło';
+});
+
+const checkLoginStrength = (str: string) => {
+  const requirements = [
+    { regex: /.{3,}/, text: 'Co najmniej 3 znaki' },
+    { regex: /^.{0,30}$/, text: 'Maksymalnie 30 znaków' },
+  ];
+
+  return requirements.map(req => ({ met: req.regex.test(str), text: req.text }));
+};
+
+const usernameFocused = ref(false);
+const usernameStrength = computed(() => checkLoginStrength(form.username));
+const usernameScore = computed(() => usernameStrength.value.filter(req => req.met).length);
+
+const usernameText = computed(() => {
+  if (usernameScore.value === 0) return 'Wpisz login';
+  if (usernameScore.value <= 1) return 'Login jest za słaby';
+  return 'Login jest wystarczająco silny';
+});
+
+const confirmPasswordFocused = ref(false);
+  
 const login = async () => {
   const loginData = {
     username: form.username,
