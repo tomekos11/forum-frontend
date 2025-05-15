@@ -2,13 +2,21 @@
   <div
     :class="`p-4 rounded-lg bg-slate-800  ${post.notification ? 'shadow-[0_4px_12px_rgba(0,255,0,0.3)]' : 'shadow-sm'}`"
   >
-    <div class="flex">
-      <div class="flex flex-col">
-        <UserImgWithPopover :user="post.user" size="big" />
-        <div class="text-sm text-gray-500 mt- text-xs">{{ formatDateShort(post.createdAt) }}</div>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <!-- Awatar + nick + data -->
+      <!-- Na mobile: wszystko w 1 linii; na desktop: w kolumnie -->
+      <div class="flex flex-row sm:flex-col items-center sm:items-start gap-2">
+        <UserImgWithPopover :user="post.user" :size="isMobile ? 'small' : 'big'" />
+
+        <div class="flex flex-col sm:items-start items-start sm:mt-1 leading-tight">
+          <h3 class="font-semibold text-xl sm:text-xl text-green-600">{{ post.user.username }}</h3>
+          <div class="text-sm text-gray-500">{{ formatDateShort(post.createdAt) }}</div>
+        </div>
       </div>
-      <div class="w-full flex flex-col min-h-full">
-        <h3 class="font-semibold text-lg text-green-600">{{ post.user.username }}</h3>
+
+      <!-- Treść posta -->
+      <div class="w-full flex flex-col min-h-full sm:ml-4">
+        <h3 v-if="!isMobile" class="font-semibold text-lg text-green-600">{{ post.user.username }}</h3>
 
         <post-edit-content
           v-if="shouldEditPost"
@@ -53,14 +61,13 @@
         </div>
       </div>
 
-
-      <div v-if="!post.isDeleted" class="ml-auto flex gap-2 flex-col justify-between items-end">
+      <!-- Opcje i reakcje -->
+      <div v-if="!post.isDeleted" class="sm:ml-auto flex gap-2 flex-row sm:flex-col justify-between items-end">
         <UPopover :popper="{ placement: 'bottom-end' }">
           <UButton icon="i-lucide-more-vertical" size="md" variant="ghost" color="neutral" />
 
           <template #content>
             <div class="flex flex-col gap-1 p-2 min-w-[160px]">
-
               <!-- Pin post -->
               <UButton
                 v-if="userStore.isAdminOrModerator"
@@ -103,7 +110,6 @@
               />
 
               <post-report-button v-if="post.user.id !== userStore.id" :post="post" />
-      
             </div>
           </template>
         </UPopover>
@@ -137,6 +143,15 @@ const editPost = ref<EditPost | null>(null);
 
 const shouldEditPost = computed(() => editPost.value?.postId === props.post.id);
 
+const isMobile = ref(false);
+
+onMounted(() => {
+  isMobile.value = window.innerWidth < 640;
+  window.addEventListener('resize', () => {
+    isMobile.value = window.innerWidth < 640;
+  });
+});
+
 const isPostPinned = (post: Post) => {
   return post.id === postsStore.pinnedPost?.id;
 };
@@ -156,11 +171,7 @@ const selection = useTextSelection();
 const showMenuIfTextSelected = async () => {
   await setTimeout(() => {
     const text = selection.text.value ? selection.text.value : '';
-    if (text.trim()) {
-      showMenu.value = true;
-    } else {
-      showMenu.value = false;
-    }
+    showMenu.value = text.trim().length > 0;
   }, 20);
 };
 
@@ -175,7 +186,6 @@ const quote = () => {
 
   selectedText.value = '';
 };
-
 
 const parsedContent = ref('');
 
@@ -202,5 +212,4 @@ watch(() => props.post.content, (newContent) => {
 
   parsedContent.value = DOMPurify.sanitize(processedContent);
 });
-
 </script>
