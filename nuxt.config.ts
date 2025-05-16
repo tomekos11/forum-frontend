@@ -27,9 +27,28 @@ export default defineNuxtConfig({
         'img-src': ['\'self\'', 'data:', 'blob:', 'https://i.pravatar.cc', import.meta.env.NUXT_PUBLIC_API_URL, import.meta.env.NUXT_PUBLIC_API_URL_HTTPS],
         'font-src': ['\'self\''],
         'object-src': ['\'none\''],
+        'frame-ancestors' : ['\'none\''],
         'upgrade-insecure-requests': true,
       },
     },
+  },
+
+  routeRules: {
+    '/api/**': {
+      cors: true,
+      headers: {
+        'Access-Control-Allow-Origin': import.meta.env.NUXT_PUBLIC_API_URL,
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+      }
+    },
+    '/**': {
+      headers: {
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY'
+      }
+    }
   },
 
   runtimeConfig: {
