@@ -1,9 +1,21 @@
-export const useFetchWithAuth = <T>(url: string, options: any = {}): Promise<T> => {
+export const useFetchWithAuth = async <T>(url: string, options: any = {}): Promise<T> => {
   const config = useRuntimeConfig();
 
-  const headers = import.meta.server
-    ? { cookie: useRequestHeaders(['cookie']).cookie || '' }
-    : {};
+  let headers = {};
+
+  if (import.meta.server) {
+    // Serwer — pobierz cookies z request headers (np. do SSR)
+    const cookie = useRequestHeaders(['cookie']).cookie || '';
+    headers = { cookie };
+  } else {
+    // Klient — dynamiczny import i odczyt cookies
+    const Cookies = (await import('js-cookie')).default;
+    const xsrfToken = Cookies.get('XSRF-TOKEN');
+    headers = {
+      'X-XSRF-TOKEN': xsrfToken || '',
+    };
+  }
+
     
   return $fetch<T>(config.public.API_URL + url, {
     credentials: 'include',

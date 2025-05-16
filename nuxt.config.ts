@@ -21,10 +21,10 @@ export default defineNuxtConfig({
     headers: {
       contentSecurityPolicy: {
         'default-src': ['\'self\''],
-        'connect-src': ['\'self\'', import.meta.env.NUXT_PUBLIC_API_URL],
+        'connect-src': ['\'self\'', import.meta.env.NUXT_PUBLIC_API_URL, import.meta.env.NUXT_PUBLIC_API_URL_HTTPS],
         'script-src': ['\'self\'', '\'nonce-{{nonce}}\'', '\'strict-dynamic\''],
         'style-src': ['\'self\'', 'https:', '\'unsafe-inline\''],
-        'img-src': ['\'self\'', 'data:', 'blob:', 'https://i.pravatar.cc', import.meta.env.NUXT_PUBLIC_API_URL],
+        'img-src': ['\'self\'', 'data:', 'blob:', 'https://i.pravatar.cc', import.meta.env.NUXT_PUBLIC_API_URL, import.meta.env.NUXT_PUBLIC_API_URL_HTTPS],
         'font-src': ['\'self\''],
         'object-src': ['\'none\''],
         'upgrade-insecure-requests': true,
@@ -34,7 +34,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      API_URL: import.meta.env.NUXT_PUBLIC_API_URL
+      API_URL: import.meta.env.NUXT_PUBLIC_API_URL,
+      API_URL_HTTPS: import.meta.env.NUXT_PUBLIC_API_URL_HTTPS,
     }
   }
 });
