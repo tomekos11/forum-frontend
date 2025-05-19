@@ -14,7 +14,7 @@
 
     <!-- <img v-if="size === 'big' && !slots.default" class="rounded-sm mr-5 w-[100px] max-h-[100px]" :src="user.data?.image || ''"> -->
 
-    <UAvatar v-else-if="!slots.default" :src="user.data?.image || ''" :alt="user?.username || 'Avatar'" size="sm" class="mr-1"/>
+    <UAvatar v-else-if="!slots.default" :src="user.data?.image || ''" :alt="user?.username || 'Avatar'" size="2xl" class="mr-1"/>
 
     <slot />
     
@@ -74,7 +74,7 @@ import type { User } from '~/types/types';
 
 interface Props {
   user: User
-  size?: 'big'
+  size?: 'big' |'small'
 }
 
 defineProps<Props>();
