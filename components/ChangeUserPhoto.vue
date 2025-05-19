@@ -8,7 +8,7 @@
     />
 
     <template #content>
-      <UCard style="max-width: 600px;">
+      <UCard class="max-w-[600px]">
 
         <div>
           Zmiana zdjęcia

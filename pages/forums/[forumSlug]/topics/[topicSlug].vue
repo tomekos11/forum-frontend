@@ -69,7 +69,7 @@
     <paginated-posts v-else :posts="postsStore.posts" :pinned-post="postsStore.topic?.pinnedPost || null" class="mt-5" />
 
 
-    <UPagination  v-if="postsStore.posts && postsStore.posts.length" v-model:page="page" :items-per-page="postsStore.meta?.perPage" :total="postsStore.meta?.total || 0" class="mt-5 ml-auto mb-2" style="padding-bottom: 200px;"/>
+    <UPagination  v-if="postsStore.posts && postsStore.posts.length" v-model:page="page" :items-per-page="postsStore.meta?.perPage" :total="postsStore.meta?.total || 0" class="mt-5 ml-auto mb-2 pb-[200px]"/>
 
     <add-post v-if="postsStore?.topic && postsStore.posts && postsStore.posts.length" :topic="postsStore.topic" @post-added="(post: Post) => postsStore.posts.push(post)"/>
       

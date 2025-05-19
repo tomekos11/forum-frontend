@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="fixed bottom-0 left-0 w-full p-2 border-t shadow-md z-10"
-    style="background: var(--ui-bg);"
-  >
+  <div class="fixed bottom-0 left-0 w-full p-2 border-t shadow-md z-10 bg-[var(--ui-bg)]">
     <template v-if="topic.isClosed">
       <UIcon name="i-lucide-lock" size="xs" />
       Temat jest zamknięty. Nie można udzielić odpowiedzi
