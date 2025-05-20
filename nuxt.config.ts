@@ -17,13 +17,14 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   security: {
+    // rateLimiter: false,
     nonce: true,
     headers: {
       contentSecurityPolicy: {
         'default-src': ['\'self\''],
         'connect-src': ['\'self\'', import.meta.env.NUXT_PUBLIC_API_URL, import.meta.env.NUXT_PUBLIC_API_URL_HTTPS],
         'script-src': ['\'self\'', '\'nonce-{{nonce}}\'', '\'strict-dynamic\''],
-        'style-src': ['\'self\'', 'https:', '\'unsafe-inline\''],
+        'style-src': ['\'self\'', '\'nonce-{{nonce}}\''],
         'img-src': ['\'self\'', 'data:', 'blob:', 'https://i.pravatar.cc', import.meta.env.NUXT_PUBLIC_API_URL, import.meta.env.NUXT_PUBLIC_API_URL_HTTPS],
         'font-src': ['\'self\''],
         'object-src': ['\'none\''],
@@ -47,7 +48,10 @@ export default defineNuxtConfig({
       headers: {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY'
-      }
+      },
+      // security: {
+      // corsHandler: false
+      // }
     }
   },
 
