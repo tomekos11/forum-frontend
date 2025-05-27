@@ -24,7 +24,7 @@ export default defineNuxtConfig({
         'default-src': ['\'self\''],
         'connect-src': ['\'self\'', import.meta.env.NUXT_PUBLIC_API_URL, import.meta.env.NUXT_PUBLIC_API_URL_HTTPS],
         'script-src': ['\'self\'', '\'nonce-{{nonce}}\'', '\'strict-dynamic\''],
-        'style-src': ['\'self\'', '\'nonce-{{nonce}}\''],
+        'style-src': ['\'self\'', '\'unsafe-inline\''],
         'img-src': ['\'self\'', 'data:', 'blob:', 'https://i.pravatar.cc', import.meta.env.NUXT_PUBLIC_API_URL, import.meta.env.NUXT_PUBLIC_API_URL_HTTPS],
         'font-src': ['\'self\''],
         'object-src': ['\'none\''],
