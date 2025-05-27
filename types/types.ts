@@ -145,3 +145,9 @@ export interface EditPost {
     postId: number;
     content: string;
 }
+
+export interface ReportReason {
+    enLabel: string;
+    plLabel: string;
+    value: string;
+  }

@@ -16,7 +16,9 @@
             <div class="text-sm sm:text-xs text-gray-500">{{ formatDateShort(post.createdAt) }}</div>
           </div>
 
-          <post-options-menu v-if="isMobile" :post="post" @edit="startEditing(post)" />
+          
+          <post-options-menu v-if="isMobile && userStore.isLoggedIn" :post="post" @edit="startEditing(post)" />
+          <div v-else />
         </div>
 
 
@@ -75,10 +77,12 @@
         class="sm:ml-auto flex gap-2 flex-row sm:flex-col justify-between items-end"
       >
         <post-options-menu
-          v-if="!isMobile"
+          v-if="!isMobile && userStore.isLoggedIn"
           :post="post"
           @edit="startEditing(post)"
         />
+        <div v-else />
+
         <reaction-segment
           v-if="post"
           :post="post"

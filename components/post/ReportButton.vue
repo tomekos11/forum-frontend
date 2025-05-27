@@ -30,12 +30,13 @@
           </div>
         
           <form @submit.prevent="onSubmit">
-            <UFormField label="Powód zgłoszenia" required>
+            <UFormField v-if="reasons" label="Powód zgłoszenia" required>
               <USelect
                 v-model="reason"
                 :items="reasons"
                 placeholder="Wybierz powód"
                 size="xl"
+                label-key="plLabel"
                 class="w-full"
               />
             </UFormField>
@@ -63,7 +64,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useUserStore } from '~/stores/user';
-import type { Post } from '~/types/types';
+import type { Post, ReportReason } from '~/types/types';
+import { useFetchWithAuth, useReportReasons  } from '#imports';
 
 interface Props {
   post: Post
@@ -75,13 +77,35 @@ const userStore = useUserStore();
 const showModal = ref(false);
 
 const message = ref('');
-const reasons = [
-  { label: 'Hejt / obraźliwa treść', value: 'hate' },
-  { label: 'Spam / reklama', value: 'spam' },
-  { label: 'Nieprawdziwa informacja', value: 'false-info' }
-];
+// const reasons = [
+//   { label: 'Hejt / obraźliwa treść', value: 'hate' },
+//   { label: 'Spam / reklama', value: 'spam' },
+//   { label: 'Nieprawdziwa informacja', value: 'false-info' }
+// ];
 
-const reason = ref(reasons[0]);
+// const { data: reasons } = useAsyncData('reports topics', async () => {
+
+//   const { postReason } =  await useFetchWithAuth<{postReason: ReportReason[]}>('/reports/reason', {
+//     params: {
+//       reason: 'post'
+//     }
+//   });
+
+//   if(postReason) {
+//     reason.value = postReason[0];
+//   }
+
+//   return postReason || [];
+// });
+
+const { reasons, pending, error } = useReportReasons();
+
+const reason = ref<null | ReportReason>(null);
+
+if(reasons.value) {
+  reason.value = reasons.value[0];
+}
+
 
 const onSubmit = async () => {
   await useFetchWithAuth('/reports', {
