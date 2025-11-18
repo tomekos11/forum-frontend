@@ -1,0 +1,76 @@
+name: CI/CD to AWS ECS and Terraform
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  AWS_REGION: eu-north-1
+  ECR_REPOSITORY: tf/forum/frontend
+  ECS_CLUSTER: tf_forum
+  ECS_SERVICE: tf_forum_frontend
+  TERRAFORM_DIR: terraform
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    # kopiuje kod do runnera
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+      with:
+        mask-password: 'true'
+
+    - name: Build, Tag and Push Docker image to ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+
+  terraform-deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    - name: Terraform Init
+      working-directory: ${{ env.TERRAFORM_DIR }}
+      env:
+        TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
+        TF_DDB_TABLE: ${{ secrets.TF_DDB_TABLE }}
+        AWS_REGION: ${{ env.AWS_REGION }}
+      run: terraform init -backend-config="bucket=$TF_STATE_BUCKET" -backend-config="key=prod/terraform.tfstate" -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_DDB_TABLE"
+
+    - name: Terraform Apply
+      working-directory: ${{ env.TERRAFORM_DIR }}
+      env:
+        IMAGE_TAG: ${{ github.sha }}
+        AWS_REGION: ${{ env.AWS_REGION }}
+      run: terraform apply -auto-approve -var="image_tag=$IMAGE_TAG" -var="ecs_cluster=${{ env.ECS_CLUSTER }}" -var="ecs_service=${{ env.ECS_SERVICE }}"
