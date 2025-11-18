@@ -9,6 +9,9 @@ RUN npm install
 
 COPY . .
 
+ENV NUXT_CSP_API_URL=$NUXT_CSP_API_URL
+ENV NUXT_PUBLIC_API_URL=$NUXT_PUBLIC_API_URL
+
 RUN npm run build
 
 # Etap produkcyjny - lekki obraz do uruchomienia SSR Nuxt
@@ -29,6 +32,9 @@ ENV HOST 0.0.0.0
 
 ENV NITRO_PORT 8080
 ENV NITRO_HOST 0.0.0.0
+
+ENV NUXT_CSP_API_URL=https://forum.tomasz-slapinski.pl
+ENV NUXT_PUBLIC_API_URL=https://forum.tomasz-slapinski.pl/api
 
 EXPOSE 8080
 
